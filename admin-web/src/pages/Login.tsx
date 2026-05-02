@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
-import { jwtDecode } from 'jwt-decode';
+
 import axios from '../axios';
 import './Login.css';
 
