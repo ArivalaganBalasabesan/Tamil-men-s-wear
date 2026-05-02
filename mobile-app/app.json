@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "mobile_app",
-    "slug": "mobile_app",
+    "slug": "tamil-app",
     "scheme": "tmw",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -36,6 +36,12 @@
         }
       ],
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ee504157-2cbb-4047-854c-13cc6cdd3d47"
+      }
+    },
+    "owner": "balassspro"
   }
 }

@@ -71,11 +71,11 @@ export default function OutfitBuilderScreen({ navigation }) {
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Choose Shirt</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
           {shirts.map(item => (
-            <TouchableOpacity 
-              key={item._id} 
+            <TouchableOpacity
+              key={item._id}
               onPress={() => setSelectedShirt(item)}
               style={[
-                styles.itemChip, 
+                styles.itemChip,
                 { backgroundColor: theme.card, borderColor: selectedShirt?._id === item._id ? Colors.accent : theme.border }
               ]}
             >
@@ -88,11 +88,11 @@ export default function OutfitBuilderScreen({ navigation }) {
         <Text style={[styles.sectionTitle, { color: theme.text, marginTop: 20 }]}>Choose Pants</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
           {pants.map(item => (
-            <TouchableOpacity 
-              key={item._id} 
+            <TouchableOpacity
+              key={item._id}
               onPress={() => setSelectedPant(item)}
               style={[
-                styles.itemChip, 
+                styles.itemChip,
                 { backgroundColor: theme.card, borderColor: selectedPant?._id === item._id ? Colors.accent : theme.border }
               ]}
             >
@@ -104,7 +104,7 @@ export default function OutfitBuilderScreen({ navigation }) {
       </ScrollView>
 
       <TouchableOpacity style={[styles.buyBtn, { backgroundColor: Colors.accent }, shadow]} onPress={addToCart}>
-        <Text style={styles.buyBtnText}>Purchase Look - ₹{( (selectedShirt?.price || 0) + (selectedPant?.price || 0) ).toLocaleString()}</Text>
+        <Text style={styles.buyBtnText}>Purchase Look - ₹{((selectedShirt?.price || 0) + (selectedPant?.price || 0)).toLocaleString()}</Text>
       </TouchableOpacity>
     </View>
   );
