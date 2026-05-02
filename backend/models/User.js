@@ -6,7 +6,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String }, // optional for Google Auth users
   googleId: { type: String },
   phone: { type: String },
-  address: { type: String },
+  addresses: [{
+    label: String, // Home, Office
+    street: String,
+    city: String,
+    zip: String,
+    isDefault: { type: Boolean, default: false }
+  }],
   loyaltyPoints: { type: Number, default: 0 },
   bodyProfile: {
     height: { type: Number }, // in cm
@@ -19,6 +25,8 @@ const userSchema = new mongoose.Schema({
     size: { type: String }
   }],
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  passwordResetToken: String,
+  passwordResetExpire: Date,
   role: { type: String, enum: ['user', 'admin'], default: 'user' }
 });
 

@@ -9,6 +9,8 @@ import { loginSuccess } from '../store/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import api from '../api/api';
+import { useSelector } from 'react-redux';
+import { Colors, Shadows, Radius } from '../constants/Theme';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { validateEmail } from '../utils/validation';
@@ -21,6 +23,9 @@ export default function LoginScreen() {
   const dispatch  = useDispatch();
   const fadeAnim  = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
+  const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
+  const shadow = isDark ? Shadows.dark : Shadows.light;
 
   const [isLogin,  setIsLogin]  = useState(true);
   const [name,     setName]     = useState('');
@@ -78,14 +83,17 @@ export default function LoginScreen() {
   };
 
   const handleAuth = async () => {
-    if (!isLogin && !name.trim()) return showAlert('Validation Error', 'Please enter your full name.');
-    if (!validateEmail(email))     return showAlert('Validation Error', 'Please enter a valid email address.');
+    const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+
+    if (!isLogin && !trimmedName) return showAlert('Validation Error', 'Please enter your full name.');
+    if (!validateEmail(trimmedEmail)) return showAlert('Validation Error', 'Please enter a valid email address.');
     if (password.length < 6)       return showAlert('Validation Error', 'Password must be at least 6 characters.');
 
     try {
       setLoading(true);
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const payload  = isLogin ? { email, password } : { name, email, password };
+      const payload  = isLogin ? { email: trimmedEmail, password } : { name: trimmedName, email: trimmedEmail, password };
       const res      = await api.post(endpoint, payload);
       await AsyncStorage.setItem('token', res.data.token);
       dispatch(loginSuccess(res.data));
@@ -108,44 +116,44 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient colors={['#000000', '#0d0d0d', '#111111']} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
+    <LinearGradient colors={isDark ? ['#000000', '#0d0d0d'] : ['#FFF9F0', '#FFFFFF']} style={styles.container}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
           {/* ── BRAND HEADER ── */}
           <Animated.View style={[styles.brand, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-            <Text style={styles.brandTamil}>தமிழ்</Text>
-            <Text style={styles.brandEn}>MEN'S WEAR</Text>
-            <View style={styles.brandLine} />
-            <Text style={styles.brandSub}>EXCLUSIVE COLLECTION 2026</Text>
+            <Text style={[styles.brandTamil, { color: theme.primary }]}>தமிழ்</Text>
+            <Text style={[styles.brandEn, { color: theme.text }]}>MEN'S WEAR</Text>
+            <View style={[styles.brandLine, { backgroundColor: theme.primary }]} />
+            <Text style={[styles.brandSub, { color: theme.textMuted }]}>EXCLUSIVE COLLECTION 2026</Text>
           </Animated.View>
 
           {/* ── MODE TOGGLE ── */}
-          <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-            <View style={styles.toggleRow}>
+          <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: slideAnim }], backgroundColor: theme.card, borderColor: theme.border }, shadow]}>
+            <View style={[styles.toggleRow, { backgroundColor: isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.05)' }]}>
               <TouchableOpacity
-                style={[styles.toggleBtn, isLogin && styles.toggleActive]}
+                style={[styles.toggleBtn, isLogin && { backgroundColor: theme.primary }]}
                 onPress={() => !isLogin && switchMode()}
               >
-                <Text style={[styles.toggleText, isLogin && styles.toggleTextActive]}>SIGN IN</Text>
+                <Text style={[styles.toggleText, isLogin && { color: '#000' }]}>SIGN IN</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.toggleBtn, !isLogin && styles.toggleActive]}
+                style={[styles.toggleBtn, !isLogin && { backgroundColor: theme.primary }]}
                 onPress={() => isLogin && switchMode()}
               >
-                <Text style={[styles.toggleText, !isLogin && styles.toggleTextActive]}>REGISTER</Text>
+                <Text style={[styles.toggleText, !isLogin && { color: '#000' }]}>REGISTER</Text>
               </TouchableOpacity>
             </View>
 
             {/* ── FORM ── */}
             {!isLogin && (
               <View style={styles.inputWrap}>
-                <Text style={styles.label}>Full Name</Text>
+                <Text style={[styles.label, { color: theme.textMuted }]}>Full Name</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                   placeholder="Enter your full name"
-                  placeholderTextColor="#444"
+                  placeholderTextColor={theme.textMuted}
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
@@ -154,11 +162,11 @@ export default function LoginScreen() {
             )}
 
             <View style={styles.inputWrap}>
-              <Text style={styles.label}>Email Address</Text>
+              <Text style={[styles.label, { color: theme.textMuted }]}>Email Address</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Enter your email"
-                placeholderTextColor="#444"
+                placeholderTextColor={theme.textMuted}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -167,11 +175,11 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputWrap}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={[styles.label, { color: theme.textMuted }]}>Password</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
                 placeholder="Enter your password (min 6 chars)"
-                placeholderTextColor="#444"
+                placeholderTextColor={theme.textMuted}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -180,7 +188,7 @@ export default function LoginScreen() {
 
             {/* ── SUBMIT ── */}
             <TouchableOpacity
-              style={[styles.submitBtn, loading && styles.submitDisabled]}
+              style={[styles.submitBtn, { backgroundColor: theme.primary }, loading && styles.submitDisabled]}
               onPress={handleAuth}
               disabled={loading}
               activeOpacity={0.85}
@@ -200,7 +208,7 @@ export default function LoginScreen() {
 
             {/* ── GOOGLE ── */}
             <TouchableOpacity
-              style={styles.googleBtn}
+              style={[styles.googleBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   showAlert(
@@ -213,7 +221,7 @@ export default function LoginScreen() {
               }}
               activeOpacity={0.8}
             >
-              <Text style={styles.googleText}>🔵  CONTINUE WITH GOOGLE</Text>
+              <Text style={[styles.googleText, { color: theme.text }]}>🔵  CONTINUE WITH GOOGLE</Text>
             </TouchableOpacity>
 
             {/* ── HINT ── */}
@@ -234,10 +242,10 @@ const styles = StyleSheet.create({
 
   // Brand
   brand:            { alignItems: 'center', marginBottom: 40 },
-  brandTamil:       { fontSize: 52, fontWeight: '900', color: '#FFD700', letterSpacing: 2, textShadowColor: 'rgba(255,215,0,0.4)', textShadowRadius: 20 },
-  brandEn:          { fontSize: 18, fontWeight: '900', color: '#fff', letterSpacing: 6, marginTop: -8 },
-  brandLine:        { width: 48, height: 3, backgroundColor: '#FFD700', marginVertical: 16, borderRadius: 2 },
-  brandSub:         { fontSize: 10, color: '#666', letterSpacing: 3, fontWeight: '700' },
+  brandTamil:       { fontSize: 52, fontWeight: '900', letterSpacing: 2 },
+  brandEn:          { fontSize: 18, fontWeight: '900', letterSpacing: 6, marginTop: -8 },
+  brandLine:        { width: 48, height: 3, marginVertical: 16, borderRadius: 2 },
+  brandSub:         { fontSize: 10, letterSpacing: 3, fontWeight: '700' },
 
   // Card
   card:             { backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 24, padding: 24, borderWidth: 1, borderColor: 'rgba(255,215,0,0.12)' },

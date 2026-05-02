@@ -4,6 +4,8 @@ import {
   FlatList, Animated, StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector } from 'react-redux';
+import { Colors } from '../constants/Theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
@@ -44,6 +46,9 @@ const SLIDES = [
 ];
 
 export default function OnboardingScreen({ navigation }) {
+  const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
   const fadeAnim    = useRef(new Animated.Value(1)).current;
@@ -63,24 +68,24 @@ export default function OnboardingScreen({ navigation }) {
   };
 
   const renderSlide = ({ item }) => (
-    <LinearGradient colors={item.gradient} style={styles.slide}>
+    <LinearGradient colors={isDark ? ['#050505', '#1a1200'] : ['#FFF9F0', '#FFFFFF']} style={styles.slide}>
       <View style={styles.emojiContainer}>
         <Text style={styles.emoji}>{item.emoji}</Text>
-        <View style={styles.emojiGlow} />
+        <View style={[styles.emojiGlow, { backgroundColor: theme.primary + '15' }]} />
       </View>
-      <Text style={styles.titleTa}>{item.titleTa}</Text>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.subtitle}>{item.subtitle}</Text>
+      <Text style={[styles.titleTa, { color: theme.primary }]}>{item.titleTa}</Text>
+      <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
+      <Text style={[styles.subtitle, { color: theme.textMuted }]}>{item.subtitle}</Text>
     </LinearGradient>
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A0A0A" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Skip button */}
       <TouchableOpacity style={styles.skipBtn} onPress={handleGetStarted}>
-        <Text style={styles.skipText}>Skip</Text>
+        <Text style={[styles.skipText, { color: theme.textMuted }]}>Skip</Text>
       </TouchableOpacity>
 
       <FlatList
@@ -101,15 +106,15 @@ export default function OnboardingScreen({ navigation }) {
         {/* Dot indicators */}
         <View style={styles.dotsRow}>
           {SLIDES.map((_, i) => (
-            <Animated.View
+            <View
               key={i}
-              style={[styles.dot, i === currentIndex && styles.dotActive]}
+              style={[styles.dot, { backgroundColor: theme.border }, i === currentIndex && { width: 24, backgroundColor: theme.primary }]}
             />
           ))}
         </View>
 
         <TouchableOpacity style={styles.nextBtn} onPress={goNext}>
-          <LinearGradient colors={['#FFD700', '#B8960C']} style={styles.nextBtnGrad}>
+          <LinearGradient colors={[theme.primary, theme.accent]} style={styles.nextBtnGrad}>
             <Text style={styles.nextBtnText}>
               {currentIndex === SLIDES.length - 1 ? 'Get Started →' : 'Next →'}
             </Text>

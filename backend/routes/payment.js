@@ -1,11 +1,11 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const Payment = require('../models/Payment');
 const Order = require('../models/Order');
 const router = express.Router();
 
-router.post('/create-intent', auth, async (req, res) => {
+router.post('/create-intent', protect, async (req, res) => {
   try {
     const { amount, orderId } = req.body;
     
@@ -26,7 +26,7 @@ router.post('/create-intent', auth, async (req, res) => {
   }
 });
 
-router.post('/confirm', auth, async (req, res) => {
+router.post('/confirm', protect, async (req, res) => {
   try {
     const { orderId, transactionId, amount } = req.body;
     

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
-  StatusBar, Alert,
+  StatusBar, Alert, Image
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, updateQuantity, clearCart } from '../store/cartSlice';
 import api from '../api/api';
+import { Colors, Shadows } from '../constants/Theme';
 
 const CATEGORY_EMOJIS = {
   shirts:'👔', pants:'👖', suits:'🤵', traditional:'🧣',
@@ -20,8 +21,8 @@ export default function CartScreen({ navigation }) {
   const { user }   = useSelector(s => s.auth);
   const { isDark } = useSelector(s => s.theme);
 
-  const bg      = isDark ? '#0A0A0A' : '#F5F5F5';
-  const cardBg  = isDark ? '#141414' : '#FFFFFF';
+  const theme = isDark ? Colors.dark : Colors.light;
+  const shadow = isDark ? Shadows.dark : Shadows.light;
 
   const handleRemove = async (item) => {
     dispatch(removeFromCart(item));
@@ -52,9 +53,13 @@ export default function CartScreen({ navigation }) {
   const renderItem = ({ item }) => {
     const emoji = CATEGORY_EMOJIS[item.category?.toLowerCase()] || '👔';
     return (
-      <View style={[styles.card, { backgroundColor: cardBg }]}>
+      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }, shadow]}>
         <View style={styles.imageBox}>
-          <Text style={styles.emoji}>{emoji}</Text>
+          {item.images && item.images.length > 0 ? (
+            <Image source={{ uri: item.images[0] }} style={styles.itemImg} />
+          ) : (
+            <Text style={styles.emoji}>{emoji}</Text>
+          )}
         </View>
         <View style={styles.details}>
           <Text style={[styles.name, { color: isDark ? '#FFF' : '#111' }]} numberOfLines={1}>
@@ -98,14 +103,14 @@ export default function CartScreen({ navigation }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: bg }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <LinearGradient colors={isDark ? ['#0A0A0A','#141414'] : ['#FFF','#F5F5F5']} style={styles.header}>
+      <LinearGradient colors={isDark ? [theme.background, theme.card] : ['#FFF', theme.background]} style={styles.header}>
         <View>
-          <Text style={styles.headerTa}>உங்கள் கார்ட்</Text>
-          <Text style={[styles.headerTitle, { color: isDark ? '#FFF' : '#111' }]}>
+          <Text style={[styles.headerTa, { color: theme.primary }]}>உங்கள் கார்ட்</Text>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>
             Cart ({items.length})
           </Text>
         </View>
@@ -141,7 +146,7 @@ export default function CartScreen({ navigation }) {
           />
 
           {/* Summary */}
-          <View style={[styles.summary, { backgroundColor: isDark ? '#141414' : '#FFF', borderTopColor: isDark ? '#2A2A2A' : '#EEE' }]}>
+          <View style={[styles.summary, { backgroundColor: theme.card, borderTopColor: theme.border }]}>
             {/* Free shipping notice */}
             {shipping > 0 && (
               <View style={styles.shippingNote}>
@@ -182,41 +187,42 @@ export default function CartScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container:      { flex: 1 },
-  header:         { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 50, paddingBottom: 16 },
-  headerTa:       { color: '#FFD700', fontSize: 12, letterSpacing: 1 },
-  headerTitle:    { fontSize: 24, fontWeight: '800' },
+  header:         { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 40, paddingBottom: 12 },
+  headerTa:       { color: '#FFD700', fontSize: 11, letterSpacing: 1 },
+  headerTitle:    { fontSize: 22, fontWeight: '800' },
   clearBtn:       { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#EF444420', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10 },
   clearBtnText:   { color: '#EF4444', fontSize: 13, fontWeight: '600' },
   card:           { flexDirection: 'row', borderRadius: 16, marginBottom: 10, borderWidth: 1, borderColor: '#2A2A2A', overflow: 'hidden' },
   imageBox:       { width: 90, backgroundColor: '#1E1E1E', alignItems: 'center', justifyContent: 'center' },
+  itemImg:        { width: '100%', height: '100%', resizeMode: 'cover' },
   emoji:          { fontSize: 36 },
-  details:        { flex: 1, padding: 12, gap: 3 },
-  name:           { fontSize: 14, fontWeight: '700' },
-  meta:           { color: '#888', fontSize: 11 },
-  price:          { color: '#FFD700', fontSize: 14, fontWeight: '700' },
-  qtyRow:         { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
-  qtyBtn:         { width: 28, height: 28, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
-  qtyNum:         { fontSize: 15, fontWeight: '700', minWidth: 20, textAlign: 'center' },
-  rightCol:       { padding: 12, alignItems: 'flex-end', justifyContent: 'space-between' },
-  itemTotal:      { color: '#FFD700', fontSize: 14, fontWeight: '800' },
-  removeBtn:      { width: 34, height: 34, backgroundColor: '#EF444420', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  empty:          { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  emptyEmoji:     { fontSize: 64 },
-  emptyTitle:     { fontSize: 20, fontWeight: '700' },
-  emptySub:       { color: '#888', fontSize: 14 },
+  details:        { flex: 1, padding: 10, gap: 2 },
+  name:           { fontSize: 13, fontWeight: '700' },
+  meta:           { color: '#888', fontSize: 10 },
+  price:          { color: '#FFD700', fontSize: 13, fontWeight: '700' },
+  qtyRow:         { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
+  qtyBtn:         { width: 26, height: 26, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  qtyNum:         { fontSize: 14, fontWeight: '700', minWidth: 20, textAlign: 'center' },
+  rightCol:       { padding: 10, alignItems: 'flex-end', justifyContent: 'space-between' },
+  itemTotal:      { color: '#FFD700', fontSize: 13, fontWeight: '800' },
+  removeBtn:      { width: 32, height: 32, backgroundColor: '#EF444420', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  empty:          { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  emptyEmoji:     { fontSize: 56 },
+  emptyTitle:     { fontSize: 18, fontWeight: '700' },
+  emptySub:       { color: '#888', fontSize: 13 },
   shopBtn:        { borderRadius: 12, overflow: 'hidden' },
-  shopBtnGrad:    { paddingHorizontal: 28, paddingVertical: 14 },
-  shopBtnText:    { color: '#000', fontWeight: '700', fontSize: 14 },
-  summary:        { padding: 16, borderTopWidth: 1, gap: 6 },
-  shippingNote:   { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F59E0B10', padding: 10, borderRadius: 10, marginBottom: 8 },
-  shippingNoteText:{ color: '#F59E0B', fontSize: 12, flex: 1 },
+  shopBtnGrad:    { paddingHorizontal: 24, paddingVertical: 12 },
+  shopBtnText:    { color: '#000', fontWeight: '700', fontSize: 13 },
+  summary:        { padding: 12, borderTopWidth: 1, gap: 4, paddingBottom: 20 },
+  shippingNote:   { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F59E0B10', padding: 8, borderRadius: 10, marginBottom: 4 },
+  shippingNoteText:{ color: '#F59E0B', fontSize: 11, flex: 1 },
   summaryRow:     { flexDirection: 'row', justifyContent: 'space-between' },
-  sumLabel:       { fontSize: 14 },
-  sumValue:       { fontSize: 14, fontWeight: '600' },
-  totalRow:       { paddingTop: 10, borderTopWidth: 1, borderTopColor: '#2A2A2A', marginTop: 6 },
-  totalLabel:     { fontSize: 16, fontWeight: '700' },
-  totalValue:     { color: '#FFD700', fontSize: 18, fontWeight: '900' },
-  checkoutBtn:    { marginTop: 10, borderRadius: 14, overflow: 'hidden' },
-  checkoutGrad:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16 },
-  checkoutText:   { color: '#000', fontWeight: '800', fontSize: 15 },
+  sumLabel:       { fontSize: 13 },
+  sumValue:       { fontSize: 13, fontWeight: '600' },
+  totalRow:       { paddingTop: 8, borderTopWidth: 1, borderTopColor: '#2A2A2A', marginTop: 4 },
+  totalLabel:     { fontSize: 15, fontWeight: '700' },
+  totalValue:     { color: '#FFD700', fontSize: 17, fontWeight: '900' },
+  checkoutBtn:    { marginTop: 8, borderRadius: 14, overflow: 'hidden' },
+  checkoutGrad:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14 },
+  checkoutText:   { color: '#000', fontWeight: '800', fontSize: 14 },
 });

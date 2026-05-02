@@ -5,6 +5,7 @@ import { createBottomTabNavigator }      from '@react-navigation/bottom-tabs';
 import { useSelector }                   from 'react-redux';
 import Icon                              from '@expo/vector-icons/Ionicons';
 import AsyncStorage                      from '@react-native-async-storage/async-storage';
+import { Colors, Shadows }               from '../constants/Theme';
 
 // ── Screens ──────────────────────────────────────────────────
 import SplashScreen           from '../screens/SplashScreen';
@@ -27,9 +28,14 @@ import LoyaltyScreen          from '../screens/LoyaltyScreen';
 import ReviewScreen           from '../screens/ReviewScreen';
 import PaymentScreen          from '../screens/PaymentScreen';
 import PaymentSuccessScreen   from '../screens/PaymentSuccessScreen';
+import OutfitBuilderScreen    from '../screens/OutfitBuilderScreen';
+import StyleAdvisorScreen     from '../screens/StyleAdvisorScreen';
+import SupportScreen          from '../screens/SupportScreen';
+import AboutScreen            from '../screens/AboutScreen';
 
 // Admin screens
 import AdminDashboardScreen   from '../screens/AdminDashboardScreen';
+import AdminProductScreen     from '../screens/AdminProductScreen';
 import AdminProductsScreen    from '../screens/AdminProductsScreen';
 import AdminOrdersScreen      from '../screens/AdminOrdersScreen';
 
@@ -41,26 +47,33 @@ const Tab   = createBottomTabNavigator();
 // ─────────────────────────────────────────────────────────────
 function UserTabs() {
   const { isDark } = useSelector(s => s.theme);
-  const tabBg   = isDark ? '#111111' : '#FFFFFF';
-  const active  = '#FFD700';
-  const inactive = isDark ? '#555555' : '#999999';
-  const border  = isDark ? '#1E1E1E' : '#E5E5E5';
+  const theme  = isDark ? Colors.dark : Colors.light;
+  const shadow = isDark ? Shadows.dark : Shadows.light;
 
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown:         false,
-        tabBarActiveTintColor:   active,
-        tabBarInactiveTintColor: inactive,
+        headerShown: false,
+        tabBarActiveTintColor:   theme.primary,
+        tabBarInactiveTintColor: theme.tabInactive,
         tabBarStyle: {
-          backgroundColor: tabBg,
-          borderTopColor:  border,
-          borderTopWidth:  1,
-          paddingBottom:   8,
-          paddingTop:      4,
-          height:          60,
+          backgroundColor: theme.tabBar,
+          borderTopWidth:  0,
+          paddingBottom:   10,
+          paddingTop:      10,
+          height:          65,
+          position:        'absolute',
+          bottom:          15,
+          left:            20,
+          right:           20,
+          borderRadius:    20,
+          ...shadow,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { 
+          fontSize: 10, 
+          fontWeight: '800',
+          marginBottom: 5
+        },
       }}
     >
       <Tab.Screen
@@ -68,20 +81,29 @@ function UserTabs() {
         component={HomeScreen}
         options={{ tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} /> }}
       />
+      <Tab.Screen 
+        name="Cart" 
+        component={CartScreen} 
+        options={{ 
+          tabBarIcon: ({ color, size }) => <Icon name="cart" color={color} size={size} /> 
+        }} 
+      />
+      <Tab.Screen 
+        name="Wishlist" 
+        component={WishlistScreen} 
+        options={{ 
+          tabBarIcon: ({ color, size }) => <Icon name="heart" color={color} size={size} /> 
+        }} 
+      />
       <Tab.Screen
         name="Search"
         component={SearchScreen}
         options={{ tabBarIcon: ({ color, size }) => <Icon name="search" size={size} color={color} /> }}
       />
       <Tab.Screen
-        name="Cart"
-        component={CartScreen}
-        options={{ tabBarIcon: ({ color, size }) => <Icon name="cart" size={size} color={color} /> }}
-      />
-      <Tab.Screen
-        name="Wishlist"
-        component={WishlistScreen}
-        options={{ tabBarIcon: ({ color, size }) => <Icon name="heart" size={size} color={color} /> }}
+        name="Advisor"
+        component={StyleAdvisorScreen}
+        options={{ tabBarLabel: 'Advisor', tabBarIcon: ({ color, size }) => <Icon name="sparkles" size={size} color={color} /> }}
       />
       <Tab.Screen
         name="Profile"
@@ -96,9 +118,9 @@ function UserTabs() {
 //  Common Stack Options
 // ─────────────────────────────────────────────────────────────
 const darkHeader = {
-  headerStyle:     { backgroundColor: '#0A0A0A' },
-  headerTintColor: '#FFD700',
-  headerTitleStyle:{ fontWeight: '700' },
+  headerStyle:     { backgroundColor: '#1A1A1A' },
+  headerTintColor: '#D4AF37',
+  headerTitleStyle:{ fontWeight: '800' },
   headerBackTitle: '',
 };
 
@@ -133,7 +155,8 @@ export default function AppNavigator() {
         ) : user?.role === 'admin' ? (
           /* ── Admin ── */
           <>
-            <Stack.Screen name="Admin"         component={AdminDashboardScreen} />
+            <Stack.Screen name="ADMIN_DASHBOARD" component={AdminDashboardScreen} />
+            <Stack.Screen name="ADMIN_PRODUCTS" component={AdminProductScreen} />
             <Stack.Screen name="AdminProducts" component={AdminProductsScreen}
               options={{ headerShown: false }} />
             <Stack.Screen name="AdminOrders"   component={AdminOrdersScreen}
@@ -144,23 +167,31 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Main"           component={UserTabs} />
             <Stack.Screen name="ProductDetails" component={ProductDetailsScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'Product Details' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'PRODUCT DETAILS' }} />
             <Stack.Screen name="Checkout"       component={CheckoutScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'Checkout' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'CHECKOUT' }} />
             <Stack.Screen name="Payment"        component={PaymentScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'Payment' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'PAYMENT' }} />
             <Stack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
             <Stack.Screen name="OrderTracking"  component={OrderTrackingScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'Track Order' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'TRACK ORDER' }} />
             <Stack.Screen name="OrderHistory"   component={OrderHistoryScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'My Orders' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'MY ORDERS' }} />
             <Stack.Screen name="Loyalty"        component={LoyaltyScreen}
               options={{ headerShown: false }} />
             <Stack.Screen name="Reviews"        component={ReviewScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'Reviews' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'REVIEWS' }} />
             <Stack.Screen name="ProductRequest" component={ProductRequestScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'Request Product' }} />
+              options={{ ...darkHeader, headerShown: true, title: 'REQUEST PRODUCT' }} />
             <Stack.Screen name="Categories"     component={CategoryScreen}
+              options={{ headerShown: false }} />
+            <Stack.Screen name="CartStack"      component={CartScreen}
+              options={{ ...darkHeader, headerShown: true, title: 'MY CART' }} />
+            <Stack.Screen name="WishlistStack"  component={WishlistScreen}
+              options={{ ...darkHeader, headerShown: true, title: 'MY WISHLIST' }} />
+            <Stack.Screen name="Support"        component={SupportScreen}
+              options={{ headerShown: false }} />
+            <Stack.Screen name="About"          component={AboutScreen}
               options={{ headerShown: false }} />
           </>
         )}

@@ -10,6 +10,7 @@ import { logout } from '../store/authSlice';
 import { toggleTheme } from '../store/themeSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/api';
+import { Colors, Shadows } from '../constants/Theme';
 
 const { width } = Dimensions.get('window');
 
@@ -35,8 +36,8 @@ const MENU_SECTIONS = [
     title: 'Settings',
     items: [
       { icon: 'moon-outline',       label: 'Dark Mode',         route: 'theme',          color: '#A78BFA', isToggle: true },
-      { icon: 'help-circle-outline',label: 'Help & Support',    route: null,             color: '#6B7280' },
-      { icon: 'information-outline',label: 'About Us',          route: null,             color: '#6B7280' },
+      { icon: 'help-circle-outline',label: 'Help & Support',    route: 'Support',        color: '#6B7280' },
+      { icon: 'information-outline',label: 'About Us',          route: 'About',          color: '#6B7280' },
     ],
   },
 ];
@@ -48,8 +49,8 @@ export default function ProfileScreen({ navigation }) {
   const [profile,  setProfile]  = useState(null);
   const [orders,   setOrders]   = useState([]);
 
-  const bg     = isDark ? '#0A0A0A' : '#F5F5F5';
-  const cardBg = isDark ? '#141414' : '#FFFFFF';
+  const theme = isDark ? Colors.dark : Colors.light;
+  const shadow = isDark ? Shadows.dark : Shadows.light;
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -87,13 +88,13 @@ export default function ProfileScreen({ navigation }) {
   const totalSpent      = orders.reduce((s, o) => s + (o.totalAmount || 0), 0);
 
   return (
-    <View style={[styles.container, { backgroundColor: bg }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <LinearGradient
-          colors={isDark ? ['#1a1200', '#0A0A0A'] : ['#FFF9E6', '#F5F5F5']}
+          colors={isDark ? [theme.background, theme.card] : ['#FFF', theme.background]}
           style={styles.header}
         >
           {/* Avatar */}
@@ -102,27 +103,27 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.avatarText}>{initials}</Text>
             </LinearGradient>
             <View>
-              <Text style={[styles.name, { color: isDark ? '#FFF' : '#111' }]}>
+              <Text style={[styles.name, { color: theme.text }]}>
                 {profile?.name || user?.name || 'User'}
               </Text>
               <Text style={styles.email}>{profile?.email || user?.email}</Text>
-              <View style={styles.roleBadge}>
-                <Text style={styles.roleText}>{profile?.role?.toUpperCase() || 'USER'}</Text>
+              <View style={[styles.roleBadge, { backgroundColor: theme.primary + '20' }]}>
+                <Text style={[styles.roleText, { color: theme.primary }]}>{profile?.role?.toUpperCase() || 'USER'}</Text>
               </View>
             </View>
           </View>
 
           {/* Stats Row */}
-          <View style={[styles.statsRow, { backgroundColor: isDark ? '#1E1E1E' : '#FFF' }]}>
+          <View style={[styles.statsRow, { backgroundColor: theme.card, borderColor: theme.border }, shadow]}>
             {[
               { label: 'Orders',    value: totalOrders },
               { label: 'Delivered', value: completedOrders },
               { label: 'Spent',     value: `₹${totalSpent > 0 ? (totalSpent/1000).toFixed(1)+'k' : 0}` },
               { label: 'Points',    value: pts },
             ].map((s, i) => (
-              <View key={i} style={[styles.stat, i < 3 && { borderRightWidth: 1, borderRightColor: isDark ? '#2A2A2A' : '#EEE' }]}>
-                <Text style={[styles.statVal, { color: isDark ? '#FFD700' : '#B8960C' }]}>{s.value}</Text>
-                <Text style={styles.statLbl}>{s.label}</Text>
+              <View key={i} style={[styles.stat, i < 3 && { borderRightWidth: 1, borderRightColor: theme.border }]}>
+                <Text style={[styles.statVal, { color: theme.primary }]}>{s.value}</Text>
+                <Text style={[styles.statLbl, { color: theme.textMuted }]}>{s.label}</Text>
               </View>
             ))}
           </View>
@@ -131,8 +132,8 @@ export default function ProfileScreen({ navigation }) {
           {pts > 0 && (
             <TouchableOpacity onPress={() => navigation.navigate('Loyalty')} style={styles.loyaltyBanner}>
               <Icon name="star" size={16} color="#FFD700" />
-              <Text style={styles.loyaltyText}>
-                You have <Text style={{ color: '#FFD700', fontWeight: '800' }}>{pts} loyalty points</Text> — Tap to redeem!
+              <Text style={[styles.loyaltyText, { color: theme.textSub }]}>
+                You have <Text style={{ color: theme.primary, fontWeight: '800' }}>{pts} loyalty points</Text> — Tap to redeem!
               </Text>
               <Icon name="chevron-forward" size={14} color="#FFD700" />
             </TouchableOpacity>
@@ -142,16 +143,16 @@ export default function ProfileScreen({ navigation }) {
         {/* Menu Sections */}
         {MENU_SECTIONS.map((section, si) => (
           <View key={si} style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: isDark ? '#888' : '#999' }]}>
+            <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>
               {section.title.toUpperCase()}
             </Text>
-            <View style={[styles.menuCard, { backgroundColor: cardBg }]}>
+            <View style={[styles.menuCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
               {section.items.map((item, ii) => (
                 <TouchableOpacity
                   key={ii}
                   style={[
                     styles.menuItem,
-                    ii < section.items.length - 1 && { borderBottomWidth: 1, borderBottomColor: isDark ? '#2A2A2A' : '#F0F0F0' }
+                    ii < section.items.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border }
                   ]}
                   onPress={() => handleMenuPress(item)}
                   activeOpacity={0.7}
@@ -159,7 +160,7 @@ export default function ProfileScreen({ navigation }) {
                   <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
                     <Icon name={item.icon} size={18} color={item.color} />
                   </View>
-                  <Text style={[styles.menuLabel, { color: isDark ? '#FFF' : '#111' }]}>{item.label}</Text>
+                  <Text style={[styles.menuLabel, { color: theme.text }]}>{item.label}</Text>
                   <View style={styles.menuRight}>
                     {item.isToggle
                       ? <Switch
@@ -192,20 +193,20 @@ export default function ProfileScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container:      { flex: 1 },
-  header:         { padding: 20, paddingTop: 50, gap: 16 },
-  avatarSection:  { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  avatar:         { width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center' },
-  avatarText:     { color: '#000', fontSize: 24, fontWeight: '900' },
-  name:           { fontSize: 20, fontWeight: '700' },
-  email:          { color: '#888', fontSize: 13, marginTop: 2 },
+  header:         { padding: 16, paddingTop: 40, gap: 12 },
+  avatarSection:  { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar:         { width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' },
+  avatarText:     { color: '#000', fontSize: 20, fontWeight: '900' },
+  name:           { fontSize: 18, fontWeight: '700' },
+  email:          { color: '#888', fontSize: 12, marginTop: 2 },
   roleBadge:      { backgroundColor: '#FFD70020', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, alignSelf: 'flex-start', marginTop: 4 },
-  roleText:       { color: '#FFD700', fontSize: 10, fontWeight: '700' },
-  statsRow:       { flexDirection: 'row', borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#2A2A2A' },
-  stat:           { flex: 1, alignItems: 'center', paddingVertical: 12 },
-  statVal:        { fontSize: 18, fontWeight: '800' },
-  statLbl:        { color: '#888', fontSize: 10, marginTop: 2 },
-  loyaltyBanner:  { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFD70015', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#FFD70030' },
-  loyaltyText:    { flex: 1, color: '#CCC', fontSize: 13 },
+  roleText:       { color: '#FFD700', fontSize: 9, fontWeight: '700' },
+  statsRow:       { flexDirection: 'row', borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#2A2A2A', marginTop: 4 },
+  stat:           { flex: 1, alignItems: 'center', paddingVertical: 10 },
+  statVal:        { fontSize: 16, fontWeight: '800' },
+  statLbl:        { color: '#888', fontSize: 9, marginTop: 2 },
+  loyaltyBanner:  { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFD70010', borderRadius: 12, padding: 10, borderWidth: 1, borderColor: '#FFD70020' },
+  loyaltyText:    { flex: 1, color: '#CCC', fontSize: 12 },
   section:        { paddingHorizontal: 16, marginBottom: 16 },
   sectionTitle:   { fontSize: 11, fontWeight: '600', letterSpacing: 1, marginBottom: 8 },
   menuCard:       { borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#2A2A2A' },

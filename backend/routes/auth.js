@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
@@ -29,10 +29,15 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt for:', email);
     let user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: 'Invalid Credentials' });
+    if (!user) {
+      console.log('User not found in database');
+      return res.status(400).json({ msg: 'Invalid Credentials' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password match status:', isMatch);
     if (!isMatch) return res.status(400).json({ msg: 'Invalid Credentials' });
 
     const payload = { user: { id: user.id } };
@@ -48,6 +53,7 @@ router.post('/login', async (req, res) => {
 router.post('/google', async (req, res) => {
   try {
     const { email, name, googleId } = req.body;
+    console.log('🔵 Google Login Attempt:', { email, name, googleId });
     let user = await User.findOne({ email });
     if (!user) {
       user = new User({ name, email, googleId });
@@ -63,7 +69,7 @@ router.post('/google', async (req, res) => {
   }
 });
 
-router.put('/profile', auth, async (req, res) => {
+router.put('/profile', protect, async (req, res) => {
   try {
     const { height, weight, age } = req.body;
     const user = await User.findByIdAndUpdate(req.user.id, { bodyProfile: { height, weight, age } }, { new: true });

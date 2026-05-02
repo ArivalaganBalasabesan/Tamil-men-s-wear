@@ -1,172 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View, Text, FlatList, StyleSheet, TouchableOpacity,
-  StatusBar, ActivityIndicator, RefreshControl, Alert,
-} from 'react-native';
-import Icon from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSelector } from 'react-redux';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, StatusBar, ActivityIndicator } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { Colors, Shadows, Radius } from '../constants/Theme';
 import api from '../api/api';
-
-const CATEGORY_EMOJIS = {
-  shirts:'👔', pants:'👖', suits:'🤵', traditional:'🧣',
-  formal:'💼', casual:'👕', ethnic:'🎭', accessories:'👜', innerwear:'🩲',
-};
+import Icon from '@expo/vector-icons/Ionicons';
 
 export default function WishlistScreen({ navigation }) {
-  const [wishlist,  setWishlist]   = useState([]);
-  const [loading,   setLoading]    = useState(true);
-  const [refreshing,setRefreshing] = useState(false);
-  const { user }   = useSelector(s => s.auth);
   const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
+  const shadow = isDark ? Shadows.dark : Shadows.light;
 
-  const bg     = isDark ? '#0A0A0A' : '#F5F5F5';
-  const cardBg = isDark ? '#141414' : '#FFFFFF';
+  const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchWishlist(); }, []);
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
 
   const fetchWishlist = async () => {
-    if (!user) return;
     try {
-      setLoading(true);
-      const res = await api.get(`/wishlist/${user._id || user.id}`);
-      setWishlist(res.data || []);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); setRefreshing(false); }
+      const res = await api.get('/wishlist');
+      setWishlist(res.data);
+    } catch (err) {
+      console.log('Wishlist fetch error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeItem = async (productId) => {
-    Alert.alert('Remove Item', 'Remove this from your wishlist?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove', style: 'destructive', onPress: async () => {
-          try {
-            await api.delete(`/wishlist/remove/${user._id || user.id}/${productId}`);
-            setWishlist(wishlist.filter(i => (i.productId?._id || i.productId) !== productId));
-          } catch (err) { Alert.alert('Error', 'Could not remove item'); }
-        }
-      }
-    ]);
-  };
-
-  const moveToCart = (product) => {
-    Alert.alert('Moved!', `${product.name} added to cart.`);
-    // In a full implementation dispatch addToCart action here
-  };
-
-  const renderItem = ({ item }) => {
-    const product = item.productId;
-    if (!product || typeof product === 'string') return null;
-
-    const emoji = CATEGORY_EMOJIS[product.category?.toLowerCase()] || '👔';
-
-    return (
-      <TouchableOpacity
-        style={[styles.card, { backgroundColor: cardBg }]}
-        onPress={() => navigation.navigate('ProductDetails', { product })}
-        activeOpacity={0.85}
-      >
-        {/* Product Image Area */}
-        <View style={styles.imageBox}>
-          <Text style={styles.emoji}>{emoji}</Text>
-          {product.discount > 0 && (
-            <View style={styles.discountBadge}>
-              <Text style={styles.discountText}>{product.discount}% OFF</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Product Info */}
-        <View style={styles.info}>
-          <Text style={[styles.name, { color: isDark ? '#FFF' : '#111' }]} numberOfLines={2}>
-            {product.name}
-          </Text>
-          <Text style={styles.category}>{product.category}</Text>
-
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>₹{product.price?.toLocaleString()}</Text>
-            {product.ratings > 0 && (
-              <View style={styles.ratingBadge}>
-                <Icon name="star" size={10} color="#FFD700" />
-                <Text style={styles.ratingText}>{product.ratings}</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Stock */}
-          <Text style={[styles.stock, { color: product.stock > 0 ? '#22C55E' : '#EF4444' }]}>
-            {product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
-          </Text>
-
-          {/* Actions */}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.cartBtn, { opacity: product.stock > 0 ? 1 : 0.5 }]}
-              onPress={() => moveToCart(product)}
-              disabled={!product.stock}
-            >
-              <LinearGradient colors={['#FFD700', '#B8960C']} style={styles.cartBtnGrad}>
-                <Icon name="cart-outline" size={14} color="#000" />
-                <Text style={styles.cartBtnText}>Add to Cart</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.removeBtn} onPress={() => removeItem(product._id)}>
-              <Icon name="trash-outline" size={18} color="#EF4444" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
+  const removeFromWishlist = async (id) => {
+    try {
+      await api.delete(`/wishlist/${id}`);
+      setWishlist(wishlist.filter(item => item._id !== id));
+    } catch (err) {
+      console.log('Remove from wishlist error');
+    }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: bg }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-
-      {/* Header */}
-      <LinearGradient colors={isDark ? ['#0A0A0A','#141414'] : ['#FFF','#F5F5F5']} style={styles.header}>
-        <View>
-          <Text style={styles.headerTa}>என் விருப்பங்கள்</Text>
-          <Text style={[styles.headerTitle, { color: isDark ? '#FFF' : '#111' }]}>
-            Wishlist
-          </Text>
-        </View>
-        <View style={[styles.countBadge, { backgroundColor: isDark ? '#1E1E1E' : '#EEE' }]}>
-          <Icon name="heart" size={16} color="#EF4444" />
-          <Text style={[styles.countNum, { color: isDark ? '#FFF' : '#111' }]}>{wishlist.length}</Text>
-        </View>
-      </LinearGradient>
+      <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+        <Text style={[styles.title, { color: theme.primary }]}>WISHLIST</Text>
+      </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#FFD700" style={{ marginTop: 60 }} />
+        <View style={styles.center}><ActivityIndicator color={theme.primary} /></View>
+      ) : wishlist.length === 0 ? (
+        <View style={styles.center}>
+          <Icon name="heart-dislike-outline" size={60} color={theme.textMuted} />
+          <Text style={[styles.emptyText, { color: theme.textMuted }]}>Your wishlist is empty</Text>
+        </View>
       ) : (
         <FlatList
           data={wishlist}
-          renderItem={renderItem}
-          keyExtractor={i => i._id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchWishlist(); }}
-              tintColor="#FFD700" />
-          }
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Text style={styles.emptyEmoji}>💝</Text>
-              <Text style={[styles.emptyTitle, { color: isDark ? '#FFF' : '#111' }]}>
-                Wishlist is Empty
-              </Text>
-              <Text style={styles.emptySubtitle}>
-                Save products you love to buy later
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.shopBtn}>
-                <LinearGradient colors={['#FFD700', '#B8960C']} style={styles.shopBtnGrad}>
-                  <Text style={styles.shopBtnText}>Explore Products</Text>
-                </LinearGradient>
+          keyExtractor={item => item._id}
+          contentContainerStyle={{ padding: 20 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity 
+              style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }, shadow]} 
+              onPress={() => navigation.navigate('ProductDetails', { productId: item._id })}
+            >
+              <Image source={{ uri: item.images[0] }} style={styles.image} />
+              <View style={styles.info}>
+                <Text style={[styles.name, { color: theme.text }]}>{item.name}</Text>
+                <Text style={[styles.price, { color: theme.primary }]}>Rs. {item.price}</Text>
+              </View>
+              <TouchableOpacity onPress={() => removeFromWishlist(item._id)} style={styles.removeBtn}>
+                <Icon name="trash-outline" size={20} color={theme.error} />
               </TouchableOpacity>
-            </View>
-          }
+            </TouchableOpacity>
+          )}
         />
       )}
     </View>
@@ -174,35 +78,15 @@ export default function WishlistScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container:      { flex: 1 },
-  header:         { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 50, paddingBottom: 16 },
-  headerTa:       { color: '#EF4444', fontSize: 12, letterSpacing: 1 },
-  headerTitle:    { fontSize: 26, fontWeight: '800' },
-  countBadge:     { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 },
-  countNum:       { fontSize: 16, fontWeight: '800' },
-  card:           { flexDirection: 'row', borderRadius: 16, marginBottom: 12, borderWidth: 1, borderColor: '#2A2A2A', overflow: 'hidden' },
-  imageBox:       { width: 110, backgroundColor: '#1E1E1E', alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  emoji:          { fontSize: 44 },
-  discountBadge:  { position: 'absolute', top: 8, left: 8, backgroundColor: '#EF4444', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
-  discountText:   { color: '#FFF', fontSize: 9, fontWeight: '700' },
-  info:           { flex: 1, padding: 12, gap: 4 },
-  name:           { fontSize: 14, fontWeight: '700', lineHeight: 20 },
-  category:       { color: '#888', fontSize: 11, textTransform: 'capitalize' },
-  priceRow:       { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  price:          { color: '#FFD700', fontSize: 16, fontWeight: '800' },
-  ratingBadge:    { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#FFD70015', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10 },
-  ratingText:     { color: '#FFD700', fontSize: 10, fontWeight: '600' },
-  stock:          { fontSize: 11, fontWeight: '600' },
-  actions:        { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  cartBtn:        { flex: 1, borderRadius: 10, overflow: 'hidden' },
-  cartBtnGrad:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 8 },
-  cartBtnText:    { color: '#000', fontWeight: '700', fontSize: 12 },
-  removeBtn:      { width: 36, height: 36, backgroundColor: '#EF444420', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  empty:          { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyEmoji:     { fontSize: 64 },
-  emptyTitle:     { fontSize: 20, fontWeight: '700' },
-  emptySubtitle:  { color: '#888', fontSize: 14, textAlign: 'center' },
-  shopBtn:        { marginTop: 8, borderRadius: 12, overflow: 'hidden' },
-  shopBtnGrad:    { paddingHorizontal: 28, paddingVertical: 14 },
-  shopBtnText:    { color: '#000', fontWeight: '700', fontSize: 14 },
+  container: { flex: 1, backgroundColor: '#000' },
+  header: { padding: 30, paddingTop: 60, backgroundColor: '#000', borderBottomWidth: 1, borderBottomColor: '#111' },
+  title: { fontSize: 24, fontWeight: '900', letterSpacing: 2 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { marginTop: 15, fontWeight: '700' },
+  card: { flexDirection: 'row', borderRadius: Radius.md, marginBottom: 15, padding: 12, alignItems: 'center', borderWidth: 1 },
+  image: { width: 70, height: 70, borderRadius: Radius.sm },
+  info: { flex: 1, marginLeft: 15 },
+  name: { fontSize: 16, fontWeight: 'bold' },
+  price: { fontSize: 14, marginTop: 4, fontWeight: '900' },
+  removeBtn: { padding: 10 }
 });

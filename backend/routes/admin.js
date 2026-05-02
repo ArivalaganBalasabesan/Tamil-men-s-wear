@@ -1,5 +1,5 @@
 const express = require('express');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Product = require('../models/Product');
@@ -14,7 +14,7 @@ const adminAuth = async (req, res, next) => {
   next();
 };
 
-router.get('/stats', auth, adminAuth, async (req, res) => {
+router.get('/stats', protect, adminAuth, async (req, res) => {
   try {
     const orders = await Order.find();
     let totalRevenue = 0;
@@ -36,7 +36,7 @@ router.get('/stats', auth, adminAuth, async (req, res) => {
   }
 });
 
-router.get('/customers', auth, adminAuth, async (req, res) => {
+router.get('/customers', protect, adminAuth, async (req, res) => {
   try {
     const customers = await User.find({ role: 'user' }).select('-password');
     res.json(customers);
@@ -45,7 +45,7 @@ router.get('/customers', auth, adminAuth, async (req, res) => {
   }
 });
 
-router.put('/stock/:id', auth, adminAuth, async (req, res) => {
+router.put('/stock/:id', protect, adminAuth, async (req, res) => {
   try {
     const { stock } = req.body;
     let product = await Product.findByIdAndUpdate(req.params.id, { stock }, { new: true });
@@ -55,7 +55,7 @@ router.put('/stock/:id', auth, adminAuth, async (req, res) => {
   }
 });
 
-router.get('/low-stock', auth, adminAuth, async (req, res) => {
+router.get('/low-stock', protect, adminAuth, async (req, res) => {
   try {
     const products = await Product.find({ stock: { $lt: 5 } });
     res.json(products);

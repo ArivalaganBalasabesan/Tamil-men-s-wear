@@ -1,10 +1,10 @@
 const express = require('express');
 const Order = require('../models/Order');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const router = express.Router();
 
-router.post('/create', auth, async (req, res) => {
+router.post('/create', protect, async (req, res) => {
   try {
     const { products, totalAmount } = req.body;
     const newOrder = new Order({
@@ -24,7 +24,7 @@ router.post('/create', auth, async (req, res) => {
   }
 });
 
-router.get('/user', auth, async (req, res) => {
+router.get('/user', protect, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
     res.json(orders);
@@ -33,7 +33,7 @@ router.get('/user', auth, async (req, res) => {
   }
 });
 
-router.get('/admin', auth, async (req, res) => {
+router.get('/admin', protect, async (req, res) => {
   try {
     const orders = await Order.find().populate('userId', ['name', 'email']).sort({ createdAt: -1 });
     res.json(orders);
@@ -42,7 +42,7 @@ router.get('/admin', auth, async (req, res) => {
   }
 });
 
-router.put('/:id/status', auth, async (req, res) => {
+router.put('/:id/status', protect, async (req, res) => {
   try {
     const { status } = req.body;
     const order = await Order.findByIdAndUpdate(req.params.id, { orderStatus: status }, { new: true });

@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import api from '../api/api';
 
 export default function ProductRequestScreen({ navigation }) {
+  const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
   const [productName, setProductName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,7 +17,7 @@ export default function ProductRequestScreen({ navigation }) {
     
     setLoading(true);
     try {
-      await api.post('/product-requests', { productName, description });
+      await api.post('/requests', { subject: productName, message: description });
       Alert.alert('Success', 'Your request has been submitted!', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
@@ -27,28 +29,28 @@ export default function ProductRequestScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient colors={['#0f0f0f', '#1a1a1a', '#121212']} style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{flex: 1}}>
         <ScrollView contentContainerStyle={styles.scroll}>
-          <Text style={styles.header}>REQUEST PRODUCT</Text>
-          <Text style={styles.subtitle}>Can't find what you're looking for? Let us know and we'll try to get it for you!</Text>
+          <Text style={[styles.header, { color: theme.primary }]}>REQUEST PRODUCT</Text>
+          <Text style={[styles.subtitle, { color: theme.textMuted }]}>Can't find what you're looking for? Let us know and we'll try to get it for you!</Text>
           
           <View style={styles.form}>
-            <Text style={styles.label}>Product Name or Type</Text>
+            <Text style={[styles.label, { color: theme.primary }]}>Product Name or Type</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
               placeholder="e.g., Silk Veshti with Gold Border"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.textMuted}
               value={productName}
               onChangeText={setProductName}
             />
 
-            <Text style={styles.label}>Description & Details</Text>
+            <Text style={[styles.label, { color: theme.primary }]}>Description & Details</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[styles.input, styles.textArea, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
               placeholder="Please provide colors, preferred size, or any other details..."
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.textMuted}
               value={description}
               onChangeText={setDescription}
               multiline
@@ -56,13 +58,13 @@ export default function ProductRequestScreen({ navigation }) {
               textAlignVertical="top"
             />
 
-            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
+            <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.primary }]} onPress={handleSubmit} disabled={loading}>
               <Text style={styles.submitText}>{loading ? 'SUBMITTING...' : 'SUBMIT REQUEST'}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 

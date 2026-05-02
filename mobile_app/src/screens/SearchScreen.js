@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity,
-  ActivityIndicator, Dimensions, Animated, StatusBar,
+  ActivityIndicator, Dimensions, Animated, StatusBar, Image
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
 import api from '../api/api';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { Colors, Shadows } from '../constants/Theme';
 
 const { width } = Dimensions.get('window');
 
@@ -13,6 +15,9 @@ const CATEGORIES = ['All', 'Shirts', 'Pants', 'Suits', 'Traditional', 'Formal', 
 const SORT_OPTIONS = ['Newest', 'Price: Low to High', 'Price: High to Low', 'Top Rated'];
 
 export default function SearchScreen() {
+  const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
+  const shadow = isDark ? Shadows.dark : Shadows.light;
   const navigation = useNavigation();
   const [query,      setQuery]      = useState('');
   const [products,   setProducts]   = useState([]);
@@ -71,14 +76,19 @@ export default function SearchScreen() {
 
   const filterHeight = filterAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 200] });
 
+
   const renderProduct = ({ item }) => (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }, shadow]}
       onPress={() => navigation.navigate('ProductDetails', { product: item })}
       activeOpacity={0.85}
     >
       <View style={styles.cardImage}>
-        <Text style={styles.cardEmoji}>👔</Text>
+        {item.images && item.images.length > 0 ? (
+          <Image source={{ uri: item.images[0] }} style={styles.productImg} />
+        ) : (
+          <Text style={styles.cardEmoji}>👔</Text>
+        )}
       </View>
       <View style={styles.cardInfo}>
         <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
@@ -95,33 +105,33 @@ export default function SearchScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A0A0A" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-back" size={22} color="#FFD700" />
+          <Icon name="arrow-back" size={22} color={theme.primary} />
         </TouchableOpacity>
-        <View style={styles.searchBar}>
-          <Icon name="search" size={18} color="#666" />
+        <View style={[styles.searchBar, { backgroundColor: theme.card }]}>
+          <Icon name="search" size={18} color={theme.textMuted} />
           <TextInput
             ref={inputRef}
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: theme.text }]}
             placeholder="Search products..."
-            placeholderTextColor="#666"
+            placeholderTextColor={theme.textMuted}
             value={query}
             onChangeText={setQuery}
             autoFocus
           />
           {query.length > 0 && (
             <TouchableOpacity onPress={() => setQuery('')}>
-              <Icon name="close-circle" size={18} color="#666" />
+              <Icon name="close-circle" size={18} color={theme.textMuted} />
             </TouchableOpacity>
           )}
         </View>
-        <TouchableOpacity onPress={() => setShowFilter(!showFilter)} style={styles.filterBtn}>
-          <Icon name="options" size={22} color={showFilter ? '#FFD700' : '#AAA'} />
+        <TouchableOpacity onPress={() => setShowFilter(!showFilter)} style={[styles.filterBtn, { backgroundColor: theme.card }]}>
+          <Icon name="options" size={22} color={showFilter ? theme.primary : theme.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -154,9 +164,9 @@ export default function SearchScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => setSortBy(item)}
-              style={[styles.sortChip, sortBy === item && styles.sortChipActive]}
+              style={[styles.sortChip, { backgroundColor: theme.card, borderColor: theme.border }, sortBy === item && { backgroundColor: theme.primary, borderColor: theme.primary }]}
             >
-              <Text style={[styles.sortChipText, sortBy === item && styles.sortChipTextActive]}>{item}</Text>
+              <Text style={[styles.sortChipText, { color: theme.textMuted }, sortBy === item && { color: '#000', fontWeight: '700' }]}>{item}</Text>
             </TouchableOpacity>
           )}
           style={{ marginTop: 8 }}
@@ -164,28 +174,30 @@ export default function SearchScreen() {
       </Animated.View>
 
       {/* Category chips */}
-      <FlatList
-        horizontal
-        data={CATEGORIES}
-        keyExtractor={i => i}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => setCategory(item)}
-            style={[styles.catChip, category === item && styles.catChipActive]}
-          >
-            <Text style={[styles.catChipText, category === item && styles.catChipTextActive]}>{item}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={{ height: 60 }}>
+        <FlatList
+          horizontal
+          data={CATEGORIES}
+          keyExtractor={i => i}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, alignItems: 'center', gap: 8 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => setCategory(item)}
+              style={[styles.catChip, { backgroundColor: theme.card, borderColor: theme.border }, category === item && { backgroundColor: theme.primary, borderColor: theme.primary }]}
+            >
+              <Text style={[styles.catChipText, { color: theme.textSub }, category === item && { color: '#000', fontWeight: '700' }]}>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
       {/* Results count */}
-      <Text style={styles.resultsText}>{filtered.length} results found</Text>
+      <Text style={[styles.resultsText, { color: theme.textMuted }]}>{filtered.length} results found</Text>
 
       {/* Product Grid */}
       {loading ? (
-        <ActivityIndicator size="large" color="#FFD700" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={filtered}
@@ -228,6 +240,7 @@ const styles = StyleSheet.create({
   resultsText:        { color: '#666', fontSize: 12, paddingHorizontal: 16, marginBottom: 4 },
   card:               { flex: 1, backgroundColor: '#141414', borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#2A2A2A' },
   cardImage:          { height: 140, backgroundColor: '#1E1E1E', alignItems: 'center', justifyContent: 'center' },
+  productImg:         { width: '100%', height: '100%', resizeMode: 'cover' },
   cardEmoji:          { fontSize: 48 },
   cardInfo:           { padding: 10 },
   cardName:           { color: '#FFF', fontSize: 13, fontWeight: '600' },

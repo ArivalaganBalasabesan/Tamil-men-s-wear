@@ -35,6 +35,8 @@ const CATEGORY_COLORS = {
 };
 
 export default function CategoryScreen({ navigation }) {
+  const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
   const [categories, setCategories] = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -67,7 +69,7 @@ export default function CategoryScreen({ navigation }) {
   const renderCategory = ({ item, index }) => {
     const slug    = item.name.toLowerCase();
     const emoji   = CATEGORY_EMOJIS[slug] || '👔';
-    const colors  = CATEGORY_COLORS[slug] || ['#1a1a1a', '#111'];
+    const colors  = isDark ? (CATEGORY_COLORS[slug] || ['#1a1a1a', '#111']) : ['#FFF', '#F0F0F0'];
     const count   = counts[slug] || 0;
 
     return (
@@ -76,22 +78,22 @@ export default function CategoryScreen({ navigation }) {
         activeOpacity={0.85}
         style={styles.cardWrapper}
       >
-        <LinearGradient colors={colors} style={[styles.card, { height: index % 3 === 0 ? CARD_SIZE * 1.2 : CARD_SIZE }]}>
+        <LinearGradient colors={colors} style={[styles.card, { height: index % 3 === 0 ? CARD_SIZE * 1.2 : CARD_SIZE, borderColor: theme.border }]}>
           {/* Decorative ring */}
-          <View style={styles.ring} />
+          <View style={[styles.ring, { borderColor: theme.primary + '20' }]} />
 
           <Text style={styles.emoji}>{emoji}</Text>
-          <Text style={styles.catName}>{item.name}</Text>
-          <Text style={styles.catDesc} numberOfLines={1}>{item.description}</Text>
+          <Text style={[styles.catName, { color: theme.text }]}>{item.name}</Text>
+          <Text style={[styles.catDesc, { color: theme.textMuted }]} numberOfLines={1}>{item.description}</Text>
 
           {/* Product count badge */}
-          <View style={styles.countBadge}>
-            <Text style={styles.countText}>{count} items</Text>
+          <View style={[styles.countBadge, { backgroundColor: theme.primary + '15', borderColor: theme.primary + '30' }]}>
+            <Text style={[styles.countText, { color: theme.primary }]}>{count} items</Text>
           </View>
 
           {/* Arrow */}
-          <View style={styles.arrow}>
-            <Icon name="arrow-forward" size={14} color="#FFD700" />
+          <View style={[styles.arrow, { backgroundColor: theme.primary + '15' }]}>
+            <Icon name="arrow-forward" size={14} color={theme.primary} />
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -99,22 +101,27 @@ export default function CategoryScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A0A0A" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <LinearGradient colors={['#0A0A0A', '#141414']} style={styles.header}>
-        <View>
-          <Text style={styles.headerTa}>வகைகள்</Text>
-          <Text style={styles.headerTitle}>Categories</Text>
+      <LinearGradient colors={isDark ? ['#0A0A0A', '#141414'] : ['#FFF', '#F5F5F5']} style={[styles.header, { borderBottomColor: theme.border }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: theme.card }]}>
+            <Icon name="arrow-back" size={22} color={theme.primary} />
+          </TouchableOpacity>
+          <View>
+            <Text style={[styles.headerTa, { color: theme.primary }]}>வகைகள்</Text>
+            <Text style={[styles.headerTitle, { color: theme.text }]}>Categories</Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.searchBtn}>
-          <Icon name="search" size={20} color="#FFD700" />
+        <TouchableOpacity onPress={() => navigation.navigate('Search')} style={[styles.searchBtn, { backgroundColor: theme.card }]}>
+          <Icon name="search" size={20} color={theme.primary} />
         </TouchableOpacity>
       </LinearGradient>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#FFD700" style={{ marginTop: 80 }} />
+        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 80 }} />
       ) : (
         <FlatList
           data={categories}
@@ -125,11 +132,11 @@ export default function CategoryScreen({ navigation }) {
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFD700" />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
           }
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              <Text style={styles.listHeaderText}>
+              <Text style={[styles.listHeaderText, { color: theme.textMuted }]}>
                 {categories.length} Categories • {Object.values(counts).reduce((a, b) => a + b, 0)} Products
               </Text>
             </View>
@@ -137,7 +144,7 @@ export default function CategoryScreen({ navigation }) {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyIcon}>🏷️</Text>
-              <Text style={styles.emptyText}>No categories available</Text>
+              <Text style={[styles.emptyText, { color: theme.textMuted }]}>No categories available</Text>
             </View>
           }
         />

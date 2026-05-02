@@ -135,25 +135,27 @@ export default function OrderHistoryScreen({ navigation }) {
       </LinearGradient>
 
       {/* Filter Chips */}
-      <FlatList
-        horizontal
-        data={FILTERS}
-        keyExtractor={i => i}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRow}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => setFilter(item)}
-            style={[styles.chip, filter === item && styles.chipActive,
-              { backgroundColor: filter === item ? '#FFD700' : (isDark ? '#1E1E1E' : '#EEE') }]}
-          >
-            <Text style={[styles.chipText, filter === item && styles.chipTextActive,
-              { color: filter === item ? '#000' : (isDark ? '#CCC' : '#666') }]}>
-              {item}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={{ height: 45 }}>
+        <FlatList
+          horizontal
+          data={FILTERS}
+          keyExtractor={i => i}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRow}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => setFilter(item)}
+              style={[styles.chip, filter === item && styles.chipActive,
+                { backgroundColor: filter === item ? '#FFD700' : (isDark ? '#1E1E1E' : '#EEE') }]}
+            >
+              <Text style={[styles.chipText, filter === item && styles.chipTextActive,
+                { color: filter === item ? '#000' : (isDark ? '#CCC' : '#666') }]}>
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
       {/* Orders List */}
       {loading ? (
@@ -189,23 +191,23 @@ export default function OrderHistoryScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container:      { flex: 1 },
-  header:         { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 50, paddingBottom: 16 },
-  headerTa:       { color: '#FFD700', fontSize: 12, letterSpacing: 1 },
-  headerTitle:    { fontSize: 26, fontWeight: '800' },
-  countBadge:     { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  countText:      { fontSize: 18, fontWeight: '900' },
-  filterRow:      { paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
-  chip:           { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1, borderColor: '#2A2A2A' },
+  header:         { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 40, paddingBottom: 12 },
+  headerTa:       { color: '#FFD700', fontSize: 11, letterSpacing: 1 },
+  headerTitle:    { fontSize: 22, fontWeight: '800' },
+  countBadge:     { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  countText:      { fontSize: 16, fontWeight: '900' },
+  filterRow:      { paddingHorizontal: 16, paddingVertical: 6, gap: 10 },
+  chip:           { paddingHorizontal: 16, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: '#2A2A2A', alignItems: 'center', justifyContent: 'center' },
   chipActive:     { borderColor: '#FFD700' },
-  chipText:       { fontSize: 12 },
-  chipTextActive: { fontWeight: '700' },
-  card:           { borderRadius: 16, marginBottom: 12, borderWidth: 1, borderColor: '#2A2A2A', overflow: 'hidden' },
-  cardHeader:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 14, paddingBottom: 10 },
-  orderId:        { fontSize: 14, fontWeight: '800', fontFamily: 'monospace' },
-  orderDate:      { color: '#888', fontSize: 11, marginTop: 2 },
-  statusBadge:    { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  statusText:     { fontSize: 11, fontWeight: '700' },
-  productsRow:    { paddingHorizontal: 14, paddingBottom: 10, gap: 8 },
+  chipText:       { fontSize: 12, fontWeight: '500' },
+  chipTextActive: { fontWeight: '800' },
+  card:           { borderRadius: 14, marginBottom: 10, borderWidth: 1, borderColor: '#2A2A2A', overflow: 'hidden' },
+  cardHeader:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 12, paddingBottom: 8 },
+  orderId:        { fontSize: 13, fontWeight: '800', fontFamily: 'monospace' },
+  orderDate:      { color: '#888', fontSize: 10, marginTop: 2 },
+  statusBadge:    { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  statusText:     { fontSize: 10, fontWeight: '700' },
+  productsRow:    { paddingHorizontal: 12, paddingBottom: 8, gap: 6 },
   productItem:    { flexDirection: 'row', alignItems: 'center', gap: 10 },
   productEmoji:   { width: 36, height: 36, backgroundColor: '#1E1E1E', borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
   productName:    { fontSize: 13, fontWeight: '600' },

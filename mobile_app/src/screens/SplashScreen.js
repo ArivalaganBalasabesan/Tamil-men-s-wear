@@ -2,10 +2,15 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
+import { Colors } from '../constants/Theme';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen({ navigation }) {
+  const { isDark } = useSelector(s => s.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
+
   const fadeAnim   = useRef(new Animated.Value(0)).current;
   const scaleAnim  = useRef(new Animated.Value(0.3)).current;
   const slideAnim  = useRef(new Animated.Value(40)).current;
@@ -27,37 +32,30 @@ export default function SplashScreen({ navigation }) {
   }, []);
 
   return (
-    <LinearGradient colors={['#0A0A0A', '#1a1200', '#0A0A0A']} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A0A0A" />
+    <LinearGradient colors={isDark ? [theme.background, '#0d0d0d', theme.background] : ['#FFF9F0', '#FFFFFF', '#FFF9F0']} style={styles.container}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* Glowing orb background */}
-      <View style={styles.orb} />
+      <View style={[styles.orb, { backgroundColor: theme.primary + '10' }]} />
 
       <Animated.View style={[styles.logoContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
-        {/* Crown icon */}
-        <Text style={styles.crown}>♔</Text>
+        <Text style={[styles.crown, { color: theme.primary }]}>♔</Text>
+        <Text style={[styles.tamilText, { color: theme.primary }]}>தமிழ்</Text>
+        <Text style={[styles.brandText, { color: theme.text }]}>MEN'S WEAR</Text>
 
-        {/* Tamil brand name */}
-        <Text style={styles.tamilText}>தமிழ்</Text>
-        <Text style={styles.brandText}>MEN'S WEAR</Text>
-
-        {/* Gold separator */}
         <View style={styles.separator}>
-          <View style={styles.line} />
-          <Text style={styles.diamond}>◆</Text>
-          <View style={styles.line} />
+          <View style={[styles.line, { backgroundColor: theme.primary + '50' }]} />
+          <Text style={[styles.diamond, { color: theme.primary }]}>◆</Text>
+          <View style={[styles.line, { backgroundColor: theme.primary + '50' }]} />
         </View>
       </Animated.View>
 
-      {/* Tagline */}
-      <Animated.Text style={[styles.tagline, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        Elegance Rooted in Tradition
+      <Animated.Text style={[styles.tagline, { opacity: fadeAnim, transform: [{ translateY: slideAnim }, { scale: fadeAnim }], color: theme.textMuted }]}>
+        PREMIUM FASHION HUB
       </Animated.Text>
 
-      {/* Loading dots */}
       <Animated.View style={[styles.dots, { opacity: fadeAnim }]}>
         {[0, 1, 2].map(i => (
-          <View key={i} style={[styles.dot, { opacity: 0.6 + i * 0.2 }]} />
+          <View key={i} style={[styles.dot, { opacity: 0.6 + i * 0.2, backgroundColor: theme.primary }]} />
         ))}
       </Animated.View>
     </LinearGradient>
@@ -66,15 +64,15 @@ export default function SplashScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container:    { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  orb:          { position: 'absolute', width: 300, height: 300, borderRadius: 150, backgroundColor: '#FFD70015', top: height * 0.15, alignSelf: 'center' },
+  orb:          { position: 'absolute', width: 300, height: 300, borderRadius: 150, top: height * 0.15, alignSelf: 'center' },
   logoContainer:{ alignItems: 'center' },
-  crown:        { fontSize: 48, color: '#FFD700', marginBottom: 8 },
-  tamilText:    { fontSize: 48, fontWeight: '800', color: '#FFD700', letterSpacing: 4, textShadowColor: '#FFD700', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 20 },
-  brandText:    { fontSize: 20, fontWeight: '300', color: '#FFFFFF', letterSpacing: 12, marginTop: 4 },
-  separator:    { flexDirection: 'row', alignItems: 'center', marginVertical: 16, width: 200 },
-  line:         { flex: 1, height: 1, backgroundColor: '#FFD70060' },
-  diamond:      { color: '#FFD700', fontSize: 10, marginHorizontal: 10 },
-  tagline:      { position: 'absolute', bottom: height * 0.2, color: '#AAAAAA', fontSize: 14, letterSpacing: 2, fontStyle: 'italic' },
-  dots:         { position: 'absolute', bottom: height * 0.12, flexDirection: 'row', gap: 8 },
-  dot:          { width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFD700' },
+  crown:        { fontSize: 56, marginBottom: 10 },
+  tamilText:    { fontSize: 64, fontWeight: '900', letterSpacing: 8 },
+  brandText:    { fontSize: 18, fontWeight: '300', letterSpacing: 14, marginTop: 8 },
+  separator:    { flexDirection: 'row', alignItems: 'center', marginVertical: 20, width: 220 },
+  line:         { flex: 1, height: 0.5 },
+  diamond:      { fontSize: 8, marginHorizontal: 12 },
+  tagline:      { position: 'absolute', bottom: height * 0.18, fontSize: 12, letterSpacing: 3, fontWeight: '400' },
+  dots:         { position: 'absolute', bottom: height * 0.1, flexDirection: 'row', gap: 10 },
+  dot:          { width: 5, height: 5, borderRadius: 2.5 },
 });
