@@ -769,26 +769,110 @@ textarea {
 
 .msg-header { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
 
-.reply-section {
-  margin-top: 32px;
-  border-top: 1px solid var(--border-color);
-  padding-top: 24px;
-}
-
-.reply-section textarea {
-  margin-bottom: 16px;
-}
-
-.send-btn {
-  background-color: var(--accent-color);
+/* Premium Button Overhaul */
+.add-btn, .save-btn, .send-btn {
+  background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
   color: #000;
+  border: none;
   padding: 12px 24px;
   border-radius: 12px;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.5px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
-  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
 }
+
+.add-btn:hover, .save-btn:hover, .send-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+  filter: brightness(1.1);
+}
+
+.view-btn, .edit-btn, .status-btn {
+  background: rgba(255, 255, 255, 0.03);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.view-btn:hover, .edit-btn:hover, .status-btn:hover {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: #FFD700;
+  transform: translateY(-1px);
+}
+
+.delete-btn, .cancel-btn {
+  background: rgba(239, 68, 68, 0.05);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover, .cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #888;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: #666;
+}
+
+/* Card Improvements */
+.review-card, .detail-card, .request-item {
+  background: linear-gradient(145deg, #141414 0%, #0d0d0d 100%);
+  border: 1px solid #222;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover, .request-item:hover {
+  border-color: rgba(255, 215, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.request-item.active {
+  background: linear-gradient(145deg, #1a1600 0%, #0d0d0d 100%);
+  border-color: #FFD700;
+}
+
+/* Tables */
+.data-table {
+  border-spacing: 0 10px;
+  border-collapse: separate;
+}
+
+.data-table tr td {
+  background: #111;
+  padding: 20px;
+}
+
+.data-table tr td:first-child { border-radius: 12px 0 0 12px; }
+.data-table tr td:last-child { border-radius: 0 12px 12px 0; }
+
 
