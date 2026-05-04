@@ -13,7 +13,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_NO_DOCTOR": "true"
+        "EXPO_NO_DOCTOR": "true",
+        "EXPO_PUBLIC_API_URL": "https://tamil-men-s-wear.onrender.com/api"
       }
     },
     "production": {}
