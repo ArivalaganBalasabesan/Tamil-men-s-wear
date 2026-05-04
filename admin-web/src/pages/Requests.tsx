@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../axios';
-import { MessageCircle, CheckCircle, Clock, Reply, User, Image as ImageIcon } from 'lucide-react';
+import { MessageCircle, CheckCircle, Reply, User, Image as ImageIcon } from 'lucide-react';
 
 interface SupportRequest {
   _id: string;

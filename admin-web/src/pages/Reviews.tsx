@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../axios';
-import { MessageSquare, Star, Trash2, User, Package, Calendar } from 'lucide-react';
+import { MessageSquare, Star, Trash2, User, Calendar } from 'lucide-react';
 
 interface Review {
   _id: string;
