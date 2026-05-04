@@ -39,7 +39,12 @@ export default function ProductRequestScreen({ navigation }) {
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color={theme.text} />
           </TouchableOpacity>
-          <Text style={[styles.header, { color: theme.primary }]}>REQUEST PRODUCT</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <Text style={[styles.header, { color: theme.primary, marginBottom: 0 }]}>REQUEST PRODUCT</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SupportHistory')}>
+              <Text style={{ color: theme.primary, fontWeight: '700', fontSize: 13 }}>MY HISTORY</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>Can't find what you're looking for? Let us know and we'll try to get it for you!</Text>
           
           <View style={styles.form}>

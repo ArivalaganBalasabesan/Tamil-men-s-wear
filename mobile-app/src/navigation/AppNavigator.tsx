@@ -31,6 +31,7 @@ import PaymentSuccessScreen   from '../screens/PaymentSuccessScreen';
 import OutfitBuilderScreen    from '../screens/OutfitBuilderScreen';
 import StyleAdvisorScreen     from '../screens/StyleAdvisorScreen';
 import SupportScreen          from '../screens/SupportScreen';
+import SupportHistoryScreen   from '../screens/SupportHistoryScreen';
 import AboutScreen            from '../screens/AboutScreen';
 
 
@@ -157,6 +158,8 @@ export default function AppNavigator() {
               options={{ ...darkHeader, headerShown: true, title: 'REVIEWS' }} />
             <Stack.Screen name="ProductRequest" component={ProductRequestScreen}
               options={{ ...darkHeader, headerShown: true, title: 'REQUEST PRODUCT' }} />
+            <Stack.Screen name="SupportHistory" component={SupportHistoryScreen}
+              options={{ ...darkHeader, headerShown: true, title: 'MY REQUESTS' }} />
             <Stack.Screen name="Categories"     component={CategoryScreen}
               options={{ headerShown: false }} />
             <Stack.Screen name="CartStack"      component={CartScreen}

@@ -43,16 +43,7 @@ const Reviews: React.FC = () => {
     fetchReviews();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to remove this review?')) {
-      try {
-        await axios.delete(`/reviews/${id}`, getTokenConfig());
-        fetchReviews();
-      } catch (err) {
-        console.error('Error deleting review:', err);
-      }
-    }
-  };
+
 
   return (
     <div className="page-container">
@@ -95,9 +86,7 @@ const Reviews: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <button className="delete-btn-minimal" onClick={() => handleDelete(review._id)}>
-                <Trash2 size={18} />
-              </button>
+
             </div>
 
             <div className="review-body">

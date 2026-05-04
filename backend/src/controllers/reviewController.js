@@ -21,6 +21,15 @@ exports.getReviews = async (req, res) => {
   }
 };
 
+exports.getAllReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find().populate('userId', 'name email').populate('productId', 'name images');
+    res.json(reviews);
+  } catch(err) {
+    res.status(500).json({msg: err.message});
+  }
+};
+
 exports.updateReview = async (req, res) => {
   try {
     const review = await Review.findByIdAndUpdate(req.params.id, req.body, {new: true});

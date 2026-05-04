@@ -11,12 +11,44 @@ export default function CheckoutScreen({ navigation }) {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
+  const [promoCode, setPromoCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [promoLoading, setPromoLoading] = useState(false);
   const [shippingDetails, setShippingDetails] = useState({
     name: '',
     email: '',
     phone: '',
     address: ''
   });
+
+  const applyPromo = async () => {
+    if (!promoCode) return;
+    setPromoLoading(true);
+    try {
+      const res = await api.get(`/promotions/validate/${promoCode}`);
+      const promo = res.data;
+      
+      if (total < promo.minPurchaseAmount) {
+        Alert.alert('Invalid', `Minimum purchase of Rs. ${promo.minPurchaseAmount} required for this code.`);
+        return;
+      }
+
+      let calcDiscount = 0;
+      if (promo.discountType === 'percentage') {
+        calcDiscount = (total * promo.discountAmount) / 100;
+      } else {
+        calcDiscount = promo.discountAmount;
+      }
+      
+      setDiscount(calcDiscount);
+      Alert.alert('Success', `Promo applied! You saved Rs. ${calcDiscount}`);
+    } catch (err) {
+      Alert.alert('Error', 'Invalid or expired promo code');
+      setDiscount(0);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
 
   const handlePayment = async () => {
     // Validations
@@ -32,11 +64,12 @@ export default function CheckoutScreen({ navigation }) {
 
     setLoading(true);
     try {
+      const finalAmount = total - discount;
       const formatProducts = items.map(item => ({ productId: item._id, quantity: item.quantity, size: item.selectedSize, price: item.price }));
-      const orderRes = await api.post('/orders/create', { products: formatProducts, totalAmount: total, shippingDetails });
+      const orderRes = await api.post('/orders/create', { products: formatProducts, totalAmount: finalAmount, shippingDetails });
       
-      const paymentRes = await api.post('/payment/create-intent', { amount: total, orderId: orderRes.data._id });
-      await api.post('/payment/confirm', { orderId: orderRes.data._id, transactionId: paymentRes.data.clientSecret, amount: total });
+      const paymentRes = await api.post('/payment/create-intent', { amount: finalAmount, orderId: orderRes.data._id });
+      await api.post('/payment/confirm', { orderId: orderRes.data._id, transactionId: paymentRes.data.clientSecret, amount: finalAmount });
       
       dispatch(clearCart());
       Alert.alert('Payment Successful', 'Your order has been placed successfully!', [
@@ -58,7 +91,32 @@ export default function CheckoutScreen({ navigation }) {
         
         <View style={styles.summaryBox}>
           <Text style={styles.summaryText}>TOTAL ITEMS: {items.reduce((acc, item) => acc + item.quantity, 0)}</Text>
-          <Text style={styles.summaryText}>TOTAL AMOUNT: Rs. {total}</Text>
+          <Text style={styles.summaryText}>SUBTOTAL: Rs. {total}</Text>
+          {discount > 0 && (
+            <Text style={[styles.summaryText, { color: '#22c55e' }]}>DISCOUNT: -Rs. {discount}</Text>
+          )}
+          <Text style={[styles.summaryText, { fontSize: 20, borderTopWidth: 1, borderTopColor: '#333', paddingTop: 10 }]}>
+            FINAL TOTAL: Rs. {total - discount}
+          </Text>
+        </View>
+
+        <Text style={styles.subHeader}>PROMO CODE</Text>
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 30 }}>
+          <TextInput 
+            style={[styles.input, { flex: 1, marginBottom: 0 }]} 
+            placeholder="Enter Code" 
+            placeholderTextColor="#666"
+            value={promoCode}
+            onChangeText={setPromoCode}
+            autoCapitalize="characters"
+          />
+          <TouchableOpacity 
+            style={[styles.applyBtn, { opacity: promoLoading ? 0.6 : 1 }]} 
+            onPress={applyPromo}
+            disabled={promoLoading}
+          >
+            {promoLoading ? <ActivityIndicator size="small" color="#000" /> : <Text style={styles.applyBtnText}>APPLY</Text>}
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.subHeader}>SHIPPING DETAILS</Text>
@@ -114,5 +172,7 @@ const styles = StyleSheet.create({
   summaryText: { color: '#fff', fontSize: 16, marginBottom: 10, fontWeight: 'bold', letterSpacing: 1 },
   input: { backgroundColor: '#111', color: '#fff', padding: 18, borderRadius: 12, borderWidth: 1, borderColor: '#332b00', marginBottom: 15, fontSize: 15 },
   payBtn: { backgroundColor: '#FFD700', padding: 20, borderRadius: 12, alignItems: 'center', marginTop: 10, shadowColor: '#FFD700', shadowOffset: {width:0, height:4}, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
-  payBtnText: { color: '#000', fontWeight: '900', fontSize: 16, letterSpacing: 1 }
+  payBtnText: { color: '#000', fontWeight: '900', fontSize: 16, letterSpacing: 1 },
+  applyBtn: { backgroundColor: '#FFD700', paddingHorizontal: 20, justifyContent: 'center', borderRadius: 12 },
+  applyBtnText: { color: '#000', fontWeight: 'bold', fontSize: 13 }
 });

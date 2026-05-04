@@ -52,6 +52,21 @@ const Promotions: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (formData.discountAmount <= 0) {
+      alert('Discount amount must be greater than 0');
+      return;
+    }
+    if (new Date(formData.startDate) > new Date(formData.endDate)) {
+      alert('Start date must be before end date');
+      return;
+    }
+    if (formData.discountType === 'percentage' && formData.discountAmount > 100) {
+      alert('Percentage discount cannot exceed 100%');
+      return;
+    }
+
     try {
       if (editingPromo) {
         await axios.put(`/promotions/${editingPromo._id}`, formData, getTokenConfig());
@@ -63,6 +78,7 @@ const Promotions: React.FC = () => {
       fetchPromotions();
     } catch (err) {
       console.error('Error saving promotion:', err);
+      alert('Error saving promotion. Please check if the code already exists.');
     }
   };
 

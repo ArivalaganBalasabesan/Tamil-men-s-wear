@@ -43,6 +43,18 @@ const Loyalty: React.FC = () => {
     }
   };
 
+  const updatePoints = async (id: string, currentPoints: number) => {
+    const newPoints = prompt('Enter new loyalty points:', currentPoints.toString());
+    if (newPoints !== null) {
+      try {
+        await axios.put(`/users/${id}`, { loyaltyPoints: parseInt(newPoints) }, getTokenConfig());
+        fetchData();
+      } catch (err) {
+        console.error('Error updating points:', err);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -125,7 +137,7 @@ const Loyalty: React.FC = () => {
                   </span>
                 </td>
                 <td>
-                  <button className="view-btn">View History</button>
+                  <button className="view-btn" onClick={() => updatePoints(user._id, user.loyaltyPoints)}>Edit Points</button>
                 </td>
               </tr>
             ))}
