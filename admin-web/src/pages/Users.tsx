@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  isActive: boolean;
 }
 
 const Users: React.FC = () => {
@@ -27,6 +28,15 @@ const Users: React.FC = () => {
       console.error('Error fetching users', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      await axios.put(`/users/${id}`, { isActive: !currentStatus });
+      fetchUsers();
+    } catch (err) {
+      console.error('Error updating user status', err);
     }
   };
 
@@ -94,6 +104,13 @@ const Users: React.FC = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
+                    <button 
+                      className={`action-icon ${user.isActive ? 'edit' : 'delete'}`} 
+                      title={user.isActive ? "Suspend User" : "Activate User"}
+                      onClick={() => toggleStatus(user._id, user.isActive)}
+                    >
+                      <Shield size={16} color={user.isActive ? "#22c55e" : "#ef4444"} />
+                    </button>
                     <button 
                       className="action-icon edit" 
                       title="Toggle Admin/User"

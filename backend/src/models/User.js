@@ -27,7 +27,8 @@ const userSchema = new mongoose.Schema({
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   passwordResetToken: String,
   passwordResetExpire: Date,
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  isActive: { type: Boolean, default: true }
 });
 
 module.exports = mongoose.model('User', userSchema);

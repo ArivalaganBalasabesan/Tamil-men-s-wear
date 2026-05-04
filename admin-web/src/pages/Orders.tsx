@@ -12,6 +12,7 @@ interface Order {
   createdAt: string;
   totalAmount: number;
   orderStatus: string;
+  paymentStatus: string;
   trackingNumber?: string;
 }
 
@@ -93,6 +94,7 @@ const Orders: React.FC = () => {
                 <th>Customer</th>
                 <th>Date</th>
                 <th>Total</th>
+                <th>Payment</th>
                 <th>Status</th>
                 <th>Tracking Number</th>
                 <th>Actions</th>
@@ -110,6 +112,11 @@ const Orders: React.FC = () => {
                   </td>
                   <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                   <td>₹{order.totalAmount.toLocaleString()}</td>
+                  <td>
+                    <span className={`badge ${order.paymentStatus?.toLowerCase() === 'completed' ? 'active' : 'processing'}`}>
+                      {order.paymentStatus || 'Pending'}
+                    </span>
+                  </td>
                   <td>
                     <select 
                       className={`status-select ${order.orderStatus.toLowerCase()}`}
