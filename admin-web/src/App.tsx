@@ -10,6 +10,10 @@ import Login from './pages/Login';
 import Users from './pages/Users';
 import Categories from './pages/Categories';
 import Inventory from './pages/Inventory';
+import Promotions from './pages/Promotions';
+import Loyalty from './pages/Loyalty';
+import Reviews from './pages/Reviews';
+import Requests from './pages/Requests';
 import './index.css';
 
 const AppRoutes = () => {
@@ -28,6 +32,10 @@ const AppRoutes = () => {
         <Route path="users" element={<Users />} />
         <Route path="categories" element={<Categories />} />
         <Route path="inventory" element={<Inventory />} />
+        <Route path="promotions" element={<Promotions />} />
+        <Route path="loyalty" element={<Loyalty />} />
+        <Route path="reviews" element={<Reviews />} />
+        <Route path="requests" element={<Requests />} />
       </Route>
     </Routes>
   );

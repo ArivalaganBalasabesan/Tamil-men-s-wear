@@ -25,4 +25,27 @@ router.get('/:productId', async (req, res) => {
   }
 });
 
+// Get All Reviews (Admin)
+router.get('/', protect, async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate('userId', 'name email')
+      .populate('productId', 'name images')
+      .sort({ createdAt: -1 });
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
+// Delete Review (Admin)
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    await Review.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'Review removed' });
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;

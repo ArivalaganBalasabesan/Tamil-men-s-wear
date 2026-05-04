@@ -10,7 +10,11 @@ import {
   LogOut,
   Bell,
   Search,
-  ChevronRight
+  ChevronRight,
+  Tag,
+  Award,
+  MessageSquare,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './AdminLayout.css';
@@ -74,6 +78,32 @@ const AdminLayout: React.FC = () => {
           <NavLink to="/inventory" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
             <Warehouse size={20} />
             <span>Inventory</span>
+            <ChevronRight size={14} className="chevron" />
+          </NavLink>
+
+          <div className="nav-group">ENGAGEMENT</div>
+
+          <NavLink to="/promotions" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <Tag size={20} />
+            <span>Promotions</span>
+            <ChevronRight size={14} className="chevron" />
+          </NavLink>
+
+          <NavLink to="/loyalty" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <Award size={20} />
+            <span>Loyalty Program</span>
+            <ChevronRight size={14} className="chevron" />
+          </NavLink>
+
+          <NavLink to="/reviews" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <MessageSquare size={20} />
+            <span>Reviews</span>
+            <ChevronRight size={14} className="chevron" />
+          </NavLink>
+
+          <NavLink to="/requests" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <MessageCircle size={20} />
+            <span>Support Requests</span>
             <ChevronRight size={14} className="chevron" />
           </NavLink>
         </nav>
