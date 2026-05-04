@@ -25,11 +25,13 @@ const Loyalty: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const res = await axios.get('/users', getTokenConfig());
-      const loyaltyUsers = res.data.filter((u: any) => u.loyaltyPoints !== undefined);
+      // Filter only customers (no admins)
+      const loyaltyUsers = res.data.filter((u: any) => u.role !== 'admin');
       setUsers(loyaltyUsers);
       
-      const total = loyaltyUsers.reduce((acc: number, curr: any) => acc + curr.loyaltyPoints, 0);
+      const total = loyaltyUsers.reduce((acc: number, curr: any) => acc + (curr.loyaltyPoints || 0), 0);
       setStats({
         totalPoints: total,
         activeMembers: loyaltyUsers.length,
@@ -71,9 +73,9 @@ const Loyalty: React.FC = () => {
             <p>Monitor customer reward points and engagement levels</p>
           </div>
         </div>
-        <button className="refresh-btn" onClick={fetchData}>
-          <RefreshCw size={20} />
-          <span>Sync Data</span>
+        <button className="add-btn" onClick={fetchData} disabled={loading}>
+          <RefreshCw size={20} className={loading ? 'spin' : ''} />
+          <span>{loading ? 'Syncing...' : 'Sync Data'}</span>
         </button>
       </div>
 
