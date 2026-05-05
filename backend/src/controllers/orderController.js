@@ -38,7 +38,18 @@ exports.createOrder = async (req, res) => {
 
     // Loyalty Points (1 point per 100)
     const pointsEarned = Math.floor(totalAmount / 100);
-    await User.findByIdAndUpdate(userId, { $inc: { loyaltyPoints: pointsEarned } });
+    if (pointsEarned > 0) {
+      const LoyaltyTransaction = require('../models/LoyaltyTransaction');
+      const loyaltyTx = new LoyaltyTransaction({
+        user: userId,
+        points: pointsEarned,
+        type: 'Earned',
+        description: `Earned from Order #${order._id}`,
+        order: order._id
+      });
+      await loyaltyTx.save();
+      await User.findByIdAndUpdate(userId, { $inc: { loyaltyPoints: pointsEarned } });
+    }
 
     res.status(201).json(order);
   } catch (err) {
