@@ -44,6 +44,24 @@ exports.updatePromotion = async (req, res) => {
   }
 };
 
+exports.validatePromo = async (req, res) => {
+  try {
+    const promo = await Promotion.findOne({ 
+      code: req.params.code.toUpperCase(),
+      isActive: true,
+      expiryDate: { $gt: new Date() }
+    });
+    
+    if (!promo) {
+      return res.status(404).json({ message: 'Invalid or expired promotion code' });
+    }
+    
+    res.json(promo);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.deletePromotion = async (req, res) => {
   try {
     const promo = await Promotion.findByIdAndDelete(req.params.id);

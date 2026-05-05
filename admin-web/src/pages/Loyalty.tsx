@@ -46,13 +46,26 @@ const Loyalty: React.FC = () => {
   };
 
   const updatePoints = async (id: string, currentPoints: number) => {
-    const newPoints = prompt('Enter new loyalty points:', currentPoints.toString());
-    if (newPoints !== null) {
+    const newPoints = prompt('Enter points to add/deduct (use negative for deduction):', '0');
+    if (newPoints !== null && !isNaN(parseInt(newPoints))) {
+      const reason = prompt('Enter reason for adjustment:', 'Customer Service Reward');
+      if (reason === null) return;
+
+      const pointsVal = Math.abs(parseInt(newPoints));
+      const type = parseInt(newPoints) >= 0 ? 'Earned' : 'Redeemed';
+
       try {
-        await axios.put(`/users/${id}`, { loyaltyPoints: parseInt(newPoints) }, getTokenConfig());
+        await axios.post('/loyalty/adjust', { 
+          userId: id, 
+          points: pointsVal, 
+          type, 
+          description: reason 
+        }, getTokenConfig());
         fetchData();
+        alert(`Successfully ${type === 'Earned' ? 'added' : 'deducted'} ${pointsVal} points.`);
       } catch (err) {
         console.error('Error updating points:', err);
+        alert('Failed to update points.');
       }
     }
   };

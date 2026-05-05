@@ -32,3 +32,25 @@ exports.addPoints = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+exports.adminAdjustPoints = async (req, res) => {
+  try {
+    const { userId, points, type, description } = req.body;
+    
+    // Create transaction
+    const transaction = new LoyaltyTransaction({
+      user: userId,
+      points,
+      type, // 'Earned' or 'Redeemed'
+      description: `[Admin Adjustment] ${description}`
+    });
+    await transaction.save();
+
+    // Update user total
+    const inc = type === 'Earned' ? points : -points;
+    await User.findByIdAndUpdate(userId, { $inc: { loyaltyPoints: inc } });
+
+    res.status(200).json({ message: 'Points adjusted successfully', transaction });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

@@ -6,11 +6,11 @@ interface Promotion {
   _id: string;
   code: string;
   description: string;
-  discountType: 'percentage' | 'fixed';
-  discountAmount: number;
+  discountType: 'Percentage' | 'Fixed';
+  discountValue: number;
   minPurchaseAmount: number;
   startDate: string;
-  endDate: string;
+  expiryDate: string;
   isActive: boolean;
 }
 
@@ -22,11 +22,11 @@ const Promotions: React.FC = () => {
   const [formData, setFormData] = useState({
     code: '',
     description: '',
-    discountType: 'percentage',
-    discountAmount: 0,
+    discountType: 'Percentage',
+    discountValue: 0,
     minPurchaseAmount: 0,
-    startDate: '',
-    endDate: '',
+    startDate: new Date().toISOString().split('T')[0],
+    expiryDate: '',
     isActive: true
   });
 
@@ -37,7 +37,7 @@ const Promotions: React.FC = () => {
 
   const fetchPromotions = async () => {
     try {
-      const res = await axios.get('/promotions/all', getTokenConfig());
+      const res = await axios.get('/promotions', getTokenConfig());
       setPromotions(res.data);
       setLoading(false);
     } catch (err) {
@@ -54,15 +54,15 @@ const Promotions: React.FC = () => {
     e.preventDefault();
     
     // Validation
-    if (formData.discountAmount <= 0) {
-      alert('Discount amount must be greater than 0');
+    if (formData.discountValue <= 0) {
+      alert('Discount value must be greater than 0');
       return;
     }
-    if (new Date(formData.startDate) > new Date(formData.endDate)) {
-      alert('Start date must be before end date');
+    if (new Date(formData.startDate) > new Date(formData.expiryDate)) {
+      alert('Start date must be before expiry date');
       return;
     }
-    if (formData.discountType === 'percentage' && formData.discountAmount > 100) {
+    if (formData.discountType === 'Percentage' && formData.discountValue > 100) {
       alert('Percentage discount cannot exceed 100%');
       return;
     }
@@ -144,14 +144,14 @@ const Promotions: React.FC = () => {
                 <td>{promo.description}</td>
                 <td>
                   <span className="discount-tag">
-                    {promo.discountAmount}{promo.discountType === 'percentage' ? '%' : ' LKR '}
+                    {promo.discountValue}{promo.discountType === 'Percentage' ? '%' : ' LKR'}
                   </span>
                 </td>
-                <td>LKR {promo.minPurchaseAmount}</td>
+                <td>LKR {promo.minPurchaseAmount.toLocaleString()}</td>
                 <td>
                   <div className="date-info">
                     <Calendar size={14} />
-                    <span>{new Date(promo.startDate).toLocaleDateString()} - {new Date(promo.endDate).toLocaleDateString()}</span>
+                    <span>{new Date(promo.startDate).toLocaleDateString()} - {new Date(promo.expiryDate).toLocaleDateString()}</span>
                   </div>
                 </td>
                 <td>
@@ -197,8 +197,8 @@ const Promotions: React.FC = () => {
                     value={formData.discountType}
                     onChange={(e) => setFormData({...formData, discountType: e.target.value as any})}
                   >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (LKR )</option>
+                    <option value="Percentage">Percentage (%)</option>
+                    <option value="Fixed">Fixed Amount (LKR )</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -206,8 +206,8 @@ const Promotions: React.FC = () => {
                   <input 
                     type="number" 
                     required 
-                    value={formData.discountAmount}
-                    onChange={(e) => setFormData({...formData, discountAmount: Number(e.target.value)})}
+                    value={formData.discountValue}
+                    onChange={(e) => setFormData({...formData, discountValue: Number(e.target.value)})}
                   />
                 </div>
                 <div className="form-group">
@@ -229,12 +229,12 @@ const Promotions: React.FC = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>End Date</label>
+                  <label>Expiry Date</label>
                   <input 
                     type="date" 
                     required 
-                    value={formData.endDate.split('T')[0]}
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                    value={formData.expiryDate.split('T')[0]}
+                    onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
                   />
                 </div>
                 <div className="form-group full-width">

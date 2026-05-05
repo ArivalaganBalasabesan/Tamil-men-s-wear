@@ -33,7 +33,7 @@ export default function LoyaltyScreen({ navigation }) {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/api/auth/me`);
+      const res = await api.get(`/auth/me`);
       setProfile(res.data);
     } catch (e) {
       setProfile(user);

@@ -36,15 +36,14 @@ export default function CheckoutScreen({ navigation }) {
         return;
       }
 
-      let calcDiscount = 0;
-      if (promo.discountType === 'percentage') {
-        calcDiscount = (total * promo.discountAmount) / 100;
+      if (promo.discountType === 'Percentage') {
+        calcDiscount = (total * promo.discountValue) / 100;
       } else {
-        calcDiscount = promo.discountAmount;
+        calcDiscount = promo.discountValue;
       }
       
       setDiscount(calcDiscount);
-      Alert.alert('Success', `Promo applied! You saved LKR ${calcDiscount}`);
+      Alert.alert('Success', `Promo applied! You saved LKR ${calcDiscount.toLocaleString()}`);
     } catch (err) {
       Alert.alert('Error', 'Invalid or expired promo code');
       setDiscount(0);
