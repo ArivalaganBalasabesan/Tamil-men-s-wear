@@ -63,9 +63,10 @@ const Loyalty: React.FC = () => {
         }, getTokenConfig());
         fetchData();
         alert(`Successfully ${type === 'Earned' ? 'added' : 'deducted'} ${pointsVal} points.`);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error updating points:', err);
-        alert('Failed to update points.');
+        const msg = err.response?.data?.message || 'Failed to update points. Please ensure the backend is fully deployed.';
+        alert(msg);
       }
     }
   };
