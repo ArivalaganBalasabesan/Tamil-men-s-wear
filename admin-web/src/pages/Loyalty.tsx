@@ -45,7 +45,7 @@ const Loyalty: React.FC = () => {
     }
   };
 
-  const updatePoints = async (id: string, currentPoints: number) => {
+  const updatePoints = async (id: string) => {
     const newPoints = prompt('Enter points to add/deduct (use negative for deduction):', '0');
     if (newPoints !== null && !isNaN(parseInt(newPoints))) {
       const reason = prompt('Enter reason for adjustment:', 'Customer Service Reward');
@@ -152,7 +152,7 @@ const Loyalty: React.FC = () => {
                   </span>
                 </td>
                 <td>
-                  <button className="view-btn" onClick={() => updatePoints(user._id, user.loyaltyPoints)}>Edit Points</button>
+                  <button className="view-btn" onClick={() => updatePoints(user._id)}>Edit Points</button>
                 </td>
               </tr>
             ))}
