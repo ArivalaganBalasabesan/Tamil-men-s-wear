@@ -44,7 +44,7 @@ export default function PaymentSuccessScreen({ route, navigation }) {
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Amount</Text>
-            <Text style={[styles.detailValue, { color: '#FFD700' }]}>₹{amount?.toLocaleString()}</Text>
+            <Text style={[styles.detailValue, { color: '#FFD700' }]}>LKR {amount?.toLocaleString()}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Payment</Text>

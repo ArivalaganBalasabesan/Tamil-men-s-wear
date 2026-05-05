@@ -68,7 +68,7 @@ export default function CartScreen({ navigation }) {
           {item.selectedSize && (
             <Text style={styles.meta}>Size: {item.selectedSize}</Text>
           )}
-          <Text style={styles.price}>₹{item.price?.toLocaleString()}</Text>
+          <Text style={styles.price}>LKR {item.price?.toLocaleString()}</Text>
 
           {/* Qty Controls */}
           <View style={styles.qtyRow}>
@@ -92,7 +92,7 @@ export default function CartScreen({ navigation }) {
 
         <View style={styles.rightCol}>
           <Text style={styles.itemTotal}>
-            ₹{((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+            LKR {((item.price || 0) * (item.quantity || 1)).toLocaleString()}
           </Text>
           <TouchableOpacity onPress={() => handleRemove(item)} style={styles.removeBtn}>
             <Icon name="trash-outline" size={18} color="#EF4444" />
@@ -152,24 +152,24 @@ export default function CartScreen({ navigation }) {
               <View style={styles.shippingNote}>
                 <Icon name="information-circle-outline" size={14} color="#F59E0B" />
                 <Text style={styles.shippingNoteText}>
-                  Add ₹{(999 - total).toLocaleString()} more for free shipping!
+                  Add LKR {(999 - total).toLocaleString()} more for free shipping!
                 </Text>
               </View>
             )}
 
             <View style={styles.summaryRow}>
               <Text style={[styles.sumLabel, { color: isDark ? '#888' : '#666' }]}>Subtotal</Text>
-              <Text style={[styles.sumValue, { color: isDark ? '#FFF' : '#111' }]}>₹{total.toLocaleString()}</Text>
+              <Text style={[styles.sumValue, { color: isDark ? '#FFF' : '#111' }]}>LKR {total.toLocaleString()}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={[styles.sumLabel, { color: isDark ? '#888' : '#666' }]}>Shipping</Text>
               <Text style={[styles.sumValue, { color: shipping === 0 ? '#22C55E' : (isDark ? '#FFF' : '#111') }]}>
-                {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                {shipping === 0 ? 'FREE' : `LKR ${shipping}`}
               </Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={[styles.totalLabel, { color: isDark ? '#FFF' : '#111' }]}>Total</Text>
-              <Text style={styles.totalValue}>₹{finalTotal.toLocaleString()}</Text>
+              <Text style={styles.totalValue}>LKR {finalTotal.toLocaleString()}</Text>
             </View>
 
             <TouchableOpacity onPress={() => navigation.navigate('Checkout')} style={styles.checkoutBtn}>
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   shopBtn:        { borderRadius: 12, overflow: 'hidden' },
   shopBtnGrad:    { paddingHorizontal: 24, paddingVertical: 12 },
   shopBtnText:    { color: '#000', fontWeight: '700', fontSize: 13 },
-  summary:        { padding: 12, borderTopWidth: 1, gap: 4, paddingBottom: 20 },
+  summary:        { padding: 16, borderTopWidth: 1, gap: 6, paddingBottom: 140 },
   shippingNote:   { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#F59E0B10', padding: 8, borderRadius: 10, marginBottom: 4 },
   shippingNoteText:{ color: '#F59E0B', fontSize: 11, flex: 1 },
   summaryRow:     { flexDirection: 'row', justifyContent: 'space-between' },

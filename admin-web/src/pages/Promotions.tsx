@@ -144,10 +144,10 @@ const Promotions: React.FC = () => {
                 <td>{promo.description}</td>
                 <td>
                   <span className="discount-tag">
-                    {promo.discountAmount}{promo.discountType === 'percentage' ? '%' : ' ₹'}
+                    {promo.discountAmount}{promo.discountType === 'percentage' ? '%' : ' LKR '}
                   </span>
                 </td>
-                <td>₹{promo.minPurchaseAmount}</td>
+                <td>LKR {promo.minPurchaseAmount}</td>
                 <td>
                   <div className="date-info">
                     <Calendar size={14} />
@@ -198,7 +198,7 @@ const Promotions: React.FC = () => {
                     onChange={(e) => setFormData({...formData, discountType: e.target.value as any})}
                   >
                     <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (₹)</option>
+                    <option value="fixed">Fixed Amount (LKR )</option>
                   </select>
                 </div>
                 <div className="form-group">

@@ -104,7 +104,7 @@ export default function OutfitBuilderScreen({ navigation }) {
       </ScrollView>
 
       <TouchableOpacity style={[styles.buyBtn, { backgroundColor: Colors.accent }, shadow]} onPress={addToCart}>
-        <Text style={styles.buyBtnText}>Purchase Look - ₹{((selectedShirt?.price || 0) + (selectedPant?.price || 0)).toLocaleString()}</Text>
+        <Text style={styles.buyBtnText}>Purchase Look - LKR {((selectedShirt?.price || 0) + (selectedPant?.price || 0)).toLocaleString()}</Text>
       </TouchableOpacity>
     </View>
   );

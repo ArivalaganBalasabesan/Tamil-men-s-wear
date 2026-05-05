@@ -186,7 +186,7 @@ const Products: React.FC = () => {
                   </td>
                   <td className="font-bold">{product.name}</td>
                   <td>{product.category}</td>
-                  <td>₹{product.price.toLocaleString()}</td>
+                  <td>LKR {product.price.toLocaleString()}</td>
                   <td>
                     <span className={`stock-badge ${product.stock < 10 ? 'low-stock' : ''}`}>
                       {product.stock}
@@ -236,7 +236,7 @@ const Products: React.FC = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Price (₹)</label>
+                  <label>Price (LKR )</label>
                   <input 
                     type="number" 
                     value={formData.price} 

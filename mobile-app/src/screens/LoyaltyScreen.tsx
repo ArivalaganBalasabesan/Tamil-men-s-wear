@@ -11,7 +11,7 @@ import api from '../services/api/api';
 
 const TIERS = [
   { name: 'Trend Starter',    minPoints: 0,    color: '#CCCCCC', emoji: '👕', perks: ['2% discount on orders', 'Birthday bonus points'] },
-  { name: 'Style Icon',       minPoints: 1000, color: '#B87333', emoji: '👔', perks: ['5% discount on orders', 'Free shipping over ₹2000', 'Priority support'] },
+  { name: 'Style Icon',       minPoints: 1000, color: '#B87333', emoji: '👔', perks: ['5% discount on orders', 'Free shipping over LKR 2000', 'Priority support'] },
   { name: 'Fashion Elite',    minPoints: 3000, color: '#C0C0C0', emoji: '🤵', perks: ['10% discount on orders', 'Free shipping always', 'Early access to sales'] },
   { name: 'Royal Gentleman',  minPoints: 7000, color: '#D4AF37', emoji: '👑', perks: ['20% discount on orders', 'Free express delivery', 'Exclusive products', 'Personal stylist'] },
 ];
@@ -89,7 +89,7 @@ export default function LoyaltyScreen({ navigation }) {
             <Text style={[styles.heroLabel, { color: theme.textMuted }]}>AVAILABLE BALANCE</Text>
             <View style={styles.cashbackRow}>
               <Icon name="wallet-outline" size={16} color={theme.primary} />
-              <Text style={[styles.heroSub, { color: theme.textSub }]}>≈ ₹{Math.floor(points / 10)} CASHBACK</Text>
+              <Text style={[styles.heroSub, { color: theme.textSub }]}>≈ LKR {Math.floor(points / 10)} CASHBACK</Text>
             </View>
 
             {nextTier && (
@@ -112,7 +112,7 @@ export default function LoyaltyScreen({ navigation }) {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>How to Earn Points</Text>
           {[
-            { icon: '🛍️', label: 'Every ₹100 spent',  pts: '+1 pt' },
+            { icon: '🛍️', label: 'Every LKR 100 spent',  pts: '+1 pt' },
             { icon: '⭐', label: 'Write a review',     pts: '+10 pts' },
             { icon: '👥', label: 'Refer a friend',     pts: '+50 pts' },
             { icon: '🎂', label: 'Birthday bonus',     pts: '+100 pts' },

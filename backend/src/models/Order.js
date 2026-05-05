@@ -15,6 +15,11 @@ const orderSchema = new mongoose.Schema({
     status: String,
     date: { type: Date, default: Date.now }
   }],
+  shippingAddress: { type: String },
+  customerName:    { type: String },
+  customerPhone:   { type: String },
+  customerEmail:   { type: String },
+  trackingNumber:  { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 

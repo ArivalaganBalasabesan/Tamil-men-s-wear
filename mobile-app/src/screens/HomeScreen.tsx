@@ -58,7 +58,7 @@ const HomeScreen = ({ navigation }) => {
       <Image source={{ uri: item.images[0] }} style={styles.productImage} />
       <View style={styles.productInfo}>
         <Text style={[styles.productName, { color: theme.text }]} numberOfLines={1}>{item.name}</Text>
-        <Text style={[styles.productPrice, { color: theme.primary }]}>₹{item.price.toLocaleString()}</Text>
+        <Text style={[styles.productPrice, { color: theme.primary }]}>LKR {(item.price || 0).toLocaleString()}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -159,9 +159,9 @@ const HomeScreen = ({ navigation }) => {
                   style={[styles.gridCard, { backgroundColor: theme.card }]}
                   onPress={() => navigation.navigate('ProductDetails', { product })}
                 >
-                  <Image source={{ uri: product.images[0] }} style={styles.gridImage} />
+                  <Image source={{ uri: product.images?.[0] || 'https://via.placeholder.com/150' }} style={styles.gridImage} />
                   <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={1}>{product.name}</Text>
-                  <Text style={[styles.gridPrice, { color: theme.primary }]}>₹{product.price}</Text>
+                  <Text style={[styles.gridPrice, { color: theme.primary }]}>LKR {product.price || 0}</Text>
                </TouchableOpacity>
             ))}
           </View>

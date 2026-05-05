@@ -50,25 +50,34 @@ export default function PaymentScreen({ route, navigation }) {
 
     setProcessing(true);
     try {
-      // 1) Create the order
-      const orderPayload = {
-        products:        cartItems || order?.products || [],
-        totalAmount:     totalAmount || order?.totalAmount,
-        shippingAddress: shippingAddress || order?.shippingAddress,
-        paymentMethod:   method,
-        paymentStatus:   method === 'cod' ? 'Pending' : 'Completed',
-        orderStatus:     'Confirmed',
-      };
+      // 1) Use the existing order ID if available, otherwise fallback (safety)
+      const targetOrderId = order?._id || order?.id;
+      
+      if (!targetOrderId) {
+        // Fallback: Create order if somehow missed in previous step
+        const orderPayload = {
+          products:        cartItems || order?.products || [],
+          totalAmount:     totalAmount || order?.totalAmount,
+          shippingAddress: shippingAddress || order?.shippingAddress,
+          paymentMethod:   method,
+          paymentStatus:   method === 'cod' ? 'Pending' : 'Completed',
+          orderStatus:     'Confirmed',
+        };
+        const orderRes = await api.post('/orders', orderPayload);
+        var createdOrderId = orderRes.data._id;
+      } else {
+        var createdOrderId = targetOrderId;
+      }
 
-      const orderRes = await api.post('/orders', orderPayload);
-      const createdOrder = orderRes.data;
-
-      // 2) Record payment
+      // 2) Record payment in Sandbox mode
       if (method !== 'cod') {
-        await api.post('/payments', {
-          orderId:       createdOrder._id,
-          amount:        totalAmount || order?.totalAmount,
-          transactionId: `TXN${Date.now()}`,
+        // Simulate Sandbox Request to Stripe
+        await api.post('/payment/create-intent', { amount: amount, orderId: createdOrderId });
+        
+        await api.post('/payment/confirm', {
+          orderId:       createdOrderId,
+          amount:        amount,
+          transactionId: `MOCK_SANDBOX_TXN_${Date.now()}`,
           paymentMethod: method,
         });
       }
@@ -76,14 +85,15 @@ export default function PaymentScreen({ route, navigation }) {
       // Success
       setProcessing(false);
       navigation.navigate('PaymentSuccess', {
-        orderId:  createdOrder._id,
-        amount:   totalAmount || order?.totalAmount,
+        orderId:  createdOrderId,
+        amount:   amount,
         method:   method === 'cod' ? 'Cash on Delivery' : method.toUpperCase(),
         isCod:    method === 'cod',
       });
     } catch (e) {
       setProcessing(false);
-      Alert.alert('Payment Failed', e.response?.data?.msg || 'Something went wrong. Please try again.');
+      console.error('Payment Error:', e.response?.data || e.message);
+      Alert.alert('Payment Failed', 'Sandbox simulation failed. Please check backend connectivity.');
     }
   };
 
@@ -111,7 +121,7 @@ export default function PaymentScreen({ route, navigation }) {
           <Text style={styles.summaryTitle}>Order Summary</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>₹{amount.toLocaleString()}</Text>
+            <Text style={styles.summaryValue}>LKR {amount.toLocaleString()}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Shipping</Text>
@@ -119,7 +129,7 @@ export default function PaymentScreen({ route, navigation }) {
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>₹{amount.toLocaleString()}</Text>
+            <Text style={styles.totalValue}>LKR {amount.toLocaleString()}</Text>
           </View>
         </LinearGradient>
 
@@ -220,7 +230,7 @@ export default function PaymentScreen({ route, navigation }) {
         {method === 'cod' && (
           <View style={styles.codInfo}>
             <Icon name="information-circle-outline" size={18} color="#F59E0B" />
-            <Text style={styles.codText}>Pay ₹{amount.toLocaleString()} in cash upon delivery. Please keep exact change.</Text>
+            <Text style={styles.codText}>Pay LKR {amount.toLocaleString()} in cash upon delivery. Please keep exact change.</Text>
           </View>
         )}
 
@@ -228,7 +238,7 @@ export default function PaymentScreen({ route, navigation }) {
           <View style={styles.codInfo}>
             <Icon name="wallet-outline" size={18} color="#FFD700" />
             <Text style={styles.codText}>
-              Your loyalty points will be used as payment. 10 points = ₹1.
+              Your loyalty points will be used as payment. 10 points = LKR 1.
             </Text>
           </View>
         )}
@@ -247,7 +257,7 @@ export default function PaymentScreen({ route, navigation }) {
               </View>
             ) : (
               <Text style={styles.payText}>
-                {method === 'cod' ? '📦 Place Order' : `💳 Pay ₹${amount.toLocaleString()}`}
+                {method === 'cod' ? '📦 Place Order' : `💳 Pay LKR ${amount.toLocaleString()}`}
               </Text>
             )}
           </LinearGradient>

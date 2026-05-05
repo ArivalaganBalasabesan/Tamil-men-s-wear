@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="stat-info">
             <span className="stat-label">Total Revenue</span>
-            <h3 className="stat-value">₹{stats?.totalRevenue?.toLocaleString()}</h3>
+            <h3 className="stat-value">LKR {stats?.totalRevenue?.toLocaleString()}</h3>
             <span className="stat-change up">
               <ArrowUpRight size={14} />
               +12.5%
@@ -135,7 +135,7 @@ const Dashboard: React.FC = () => {
                       {order.orderStatus}
                     </span>
                   </td>
-                  <td>₹{order.totalAmount}</td>
+                  <td>LKR {order.totalAmount}</td>
                 </tr>
               ))}
             </tbody>
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
                   <p>{product.category}</p>
                 </div>
                 <div className="product-meta">
-                  <span className="price">₹{product.price}</span>
+                  <span className="price">LKR {product.price}</span>
                   <span className="sales">{product.stock} in stock</span>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Shield, UserMinus } from 'lucide-react';
+import { Search, Shield, UserMinus, Trash2, UserCheck, ShieldCheck } from 'lucide-react';
 import axios from '../axios';
 import './Pages.css';
 
@@ -51,7 +51,7 @@ const Users: React.FC = () => {
   };
 
   const deleteUser = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('Are you sure you want to delete this user? This action is permanent.')) {
       try {
         await axios.delete(`/users/${id}`);
         fetchUsers();
@@ -109,20 +109,22 @@ const Users: React.FC = () => {
                       title={user.isActive ? "Suspend User" : "Activate User"}
                       onClick={() => toggleStatus(user._id, user.isActive)}
                     >
-                      <Shield size={16} color={user.isActive ? "#22c55e" : "#ef4444"} />
+                      {user.isActive ? <ShieldCheck size={18} color="#22c55e" /> : <Shield size={18} color="#ef4444" />}
                     </button>
                     <button 
                       className="action-icon edit" 
-                      title="Toggle Admin/User"
+                      title="Promote to Admin / Demote to User"
                       onClick={() => toggleRole(user._id, user.role)}
                     >
-                      <Shield size={16} />
+                      {user.role === 'admin' ? <UserCheck size={18} color="#FFD700" /> : <Shield size={18} />}
                     </button>
                     <button 
                       className="action-icon delete" 
+                      title="Permanently Delete User"
                       onClick={() => deleteUser(user._id)}
+                      style={{ marginLeft: '10px' }}
                     >
-                      <UserMinus size={16} />
+                      <Trash2 size={18} color="#ef4444" />
                     </button>
                   </td>
                 </tr>

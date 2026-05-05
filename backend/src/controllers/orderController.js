@@ -11,6 +11,10 @@ exports.createOrder = async (req, res) => {
       userId,
       products,
       totalAmount,
+      shippingAddress: req.body.shippingAddress,
+      customerName:    req.body.customerName,
+      customerPhone:   req.body.customerPhone,
+      customerEmail:   req.body.customerEmail,
       orderStatus: 'Pending'
     });
 

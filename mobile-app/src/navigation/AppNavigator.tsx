@@ -142,11 +142,11 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Main"           component={UserTabs} />
             <Stack.Screen name="ProductDetails" component={ProductDetailsScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'PRODUCT DETAILS' }} />
+              options={{ headerShown: false }} />
             <Stack.Screen name="Checkout"       component={CheckoutScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'CHECKOUT' }} />
+              options={{ headerShown: false }} />
             <Stack.Screen name="Payment"        component={PaymentScreen}
-              options={{ ...darkHeader, headerShown: true, title: 'PAYMENT' }} />
+              options={{ headerShown: false }} />
             <Stack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
             <Stack.Screen name="OrderTracking"  component={OrderTrackingScreen}
               options={{ ...darkHeader, headerShown: true, title: 'TRACK ORDER' }} />

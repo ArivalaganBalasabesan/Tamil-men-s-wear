@@ -144,7 +144,7 @@ export default function OrderTrackingScreen({ route, navigation }) {
                   {item.selectedSize ? `Size: ${item.selectedSize} • ` : ''}Qty: {item.quantity}
                 </Text>
               </View>
-              <Text style={styles.itemPrice}>₹{((item.price || 0) * (item.quantity || 1)).toLocaleString()}</Text>
+              <Text style={styles.itemPrice}>LKR {((item.price || 0) * (item.quantity || 1)).toLocaleString()}</Text>
             </View>
           ))}
         </View>
@@ -174,7 +174,7 @@ export default function OrderTrackingScreen({ route, navigation }) {
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total Amount</Text>
-              <Text style={styles.totalValue}>₹{order.totalAmount?.toLocaleString()}</Text>
+              <Text style={styles.totalValue}>LKR {order.totalAmount?.toLocaleString()}</Text>
             </View>
           </View>
         </View>

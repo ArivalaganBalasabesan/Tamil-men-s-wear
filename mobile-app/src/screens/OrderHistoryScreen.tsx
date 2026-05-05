@@ -102,7 +102,7 @@ export default function OrderHistoryScreen({ navigation }) {
           </View>
           <View style={styles.totalRow}>
             <Text style={[styles.totalLabel, { color: isDark ? '#888' : '#999' }]}>Total</Text>
-            <Text style={styles.totalValue}>₹{item.totalAmount?.toLocaleString()}</Text>
+            <Text style={styles.totalValue}>LKR {item.totalAmount?.toLocaleString()}</Text>
           </View>
         </View>
 

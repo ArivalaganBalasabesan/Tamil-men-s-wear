@@ -61,11 +61,11 @@ export default function ProductDetailsScreen({ route, navigation }) {
     } catch (e) { console.log('Server cart sync issue'); }
     
     if (Platform.OS === 'web') {
-       window.alert(`Added ${product.name} to Cart!`);
-       navigation.navigate('Cart');
+       window.alert(`Added ${product.name || 'Product'} to Cart!`);
+       navigation.navigate('Main', { screen: 'Cart' });
     } else {
-       Alert.alert('Added to Cart', `${product.name} size ${selectedSize} added to your cart.`, [
-         { text: 'View Cart', onPress: () => navigation.navigate('Cart') },
+       Alert.alert('Added to Cart', `${product.name || 'Product'} size ${selectedSize} added to your cart.`, [
+         { text: 'View Cart', onPress: () => navigation.navigate('Main', { screen: 'Cart' }) },
          { text: 'Keep Shopping', style: 'cancel' }
        ]);
     }
@@ -110,15 +110,15 @@ export default function ProductDetailsScreen({ route, navigation }) {
         <View style={styles.infoContainer}>
           <View style={styles.titleRow}>
             <View style={{flex: 1}}>
-              <Text style={styles.name}>{product.name}</Text>
-              <Text style={styles.category}>{product.category.toUpperCase()}</Text>
+              <Text style={styles.name}>{product.name || 'Product'}</Text>
+              <Text style={styles.category}>{(product.category || 'Collection').toUpperCase()}</Text>
             </View>
             <TouchableOpacity style={styles.wishBtn} onPress={handleWishlist}>
               <Text style={styles.heartIcon}>❤️</Text>
             </TouchableOpacity>
           </View>
           
-          <Text style={styles.price}>Rs. {product.price}</Text>
+          <Text style={styles.price}>Rs. {product.price || 0}</Text>
 
           <View style={styles.divider} />
 

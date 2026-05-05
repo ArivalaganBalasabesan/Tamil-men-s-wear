@@ -102,7 +102,7 @@ export default function SearchScreen() {
         <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.cardCategory}>{item.category}</Text>
         <View style={styles.cardBottom}>
-          <Text style={styles.cardPrice}>₹{item.price?.toLocaleString()}</Text>
+          <Text style={styles.cardPrice}>LKR {item.price?.toLocaleString()}</Text>
           <View style={styles.ratingBadge}>
             <Icon name="star" size={10} color="#FFD700" />
             <Text style={styles.ratingText}>{item.ratings || '4.5'}</Text>
@@ -148,7 +148,7 @@ export default function SearchScreen() {
         <View style={styles.priceRow}>
           <TextInput
             style={styles.priceInput}
-            placeholder="Min ₹"
+            placeholder="Min LKR "
             placeholderTextColor="#666"
             value={minPrice}
             onChangeText={setMinPrice}
@@ -157,7 +157,7 @@ export default function SearchScreen() {
           <Text style={{ color: '#666' }}>—</Text>
           <TextInput
             style={styles.priceInput}
-            placeholder="Max ₹"
+            placeholder="Max LKR "
             placeholderTextColor="#666"
             value={maxPrice}
             onChangeText={setMaxPrice}

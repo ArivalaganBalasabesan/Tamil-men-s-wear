@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Eye, Download } from 'lucide-react';
+import { Search, Filter, Eye, Download, Trash2 } from 'lucide-react';
 import axios from '../axios';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './Pages.css';
 
 interface Order {
@@ -9,11 +11,17 @@ interface Order {
     name: string;
     email: string;
   };
+  products: Array<{
+    productId: { name: string; price: number };
+    quantity: number;
+    size: string;
+  }>;
   createdAt: string;
   totalAmount: number;
   orderStatus: string;
   paymentStatus: string;
   trackingNumber?: string;
+  shippingAddress?: string;
 }
 
 const Orders: React.FC = () => {
@@ -59,6 +67,66 @@ const Orders: React.FC = () => {
       console.error('Error updating tracking', err);
     }
   };
+
+  const deleteOrder = async (id: string) => {
+    if (window.confirm('Delete this order? This cannot be undone.')) {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        await axios.delete(`/orders/${id}`, config);
+        fetchOrders();
+      } catch (err) {
+        console.error('Error deleting order', err);
+      }
+    }
+  };
+
+  const downloadPDF = (order: Order) => {
+    const doc = new jsPDF() as any;
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(212, 175, 55); // Gold
+    doc.text('TAMIL MEN\'S WEAR', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Invoice: #ORD-${order._id.slice(-6).toUpperCase()}`, 15, 40);
+    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 15, 47);
+    
+    // Customer Info
+    doc.setFontSize(14);
+    doc.text('Customer Details', 15, 60);
+    doc.setFontSize(11);
+    doc.text(`Name: ${order.userId?.name || 'Guest'}`, 15, 67);
+    doc.text(`Email: ${order.userId?.email}`, 15, 74);
+    doc.text(`Address: ${order.shippingAddress || 'N/A'}`, 15, 81);
+
+    // Order Table
+    const tableData = (order.products || []).map((p: any) => [
+      p.productId?.name || 'Unknown Item',
+      p.size || 'N/A',
+      p.quantity,
+      `LKR ${p.price?.toLocaleString()}`,
+      `LKR ${(p.price * p.quantity).toLocaleString()}`
+    ]);
+
+    doc.autoTable({
+      startY: 90,
+      head: [['Item', 'Size', 'Qty', 'Price', 'Subtotal']],
+      body: tableData,
+      headStyles: { fillColor: [212, 175, 55] },
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY;
+    doc.setFontSize(14);
+    doc.text(`Total Amount: LKR ${order.totalAmount.toLocaleString()}`, 15, finalY + 15);
+    doc.text(`Payment Status: ${order.paymentStatus}`, 15, finalY + 22);
+
+    doc.save(`Order_${order._id.slice(-6).toUpperCase()}.pdf`);
+  };
+
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const filteredOrders = orders.filter(o => 
     o.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -111,7 +179,7 @@ const Orders: React.FC = () => {
                     </div>
                   </td>
                   <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td>₹{order.totalAmount.toLocaleString()}</td>
+                  <td>LKR {order.totalAmount.toLocaleString()}</td>
                   <td>
                     <span className={`badge ${order.paymentStatus?.toLowerCase() === 'completed' ? 'active' : 'processing'}`}>
                       {order.paymentStatus || 'Pending'}
@@ -119,7 +187,7 @@ const Orders: React.FC = () => {
                   </td>
                   <td>
                     <select 
-                      className={`status-select ${order.orderStatus.toLowerCase()}`}
+                      className={`status-select ${order.orderStatus.toLowerCase().replace(/ /g, '-')}`}
                       value={order.orderStatus}
                       onChange={(e) => updateStatus(order._id, e.target.value)}
                     >
@@ -141,8 +209,9 @@ const Orders: React.FC = () => {
                     />
                   </td>
                   <td className="actions-cell">
-                    <button className="action-icon edit"><Eye size={16} /></button>
-                    <button className="action-icon edit"><Download size={16} /></button>
+                    <button className="action-icon edit" title="View Details" onClick={() => setSelectedOrder(order)}><Eye size={16} /></button>
+                    <button className="action-icon edit" title="Download PDF" onClick={() => downloadPDF(order)}><Download size={16} /></button>
+                    <button className="action-icon delete" title="Delete Order" onClick={() => deleteOrder(order._id)}><Trash2 size={16} /></button>
                   </td>
                 </tr>
               ))}
@@ -150,6 +219,58 @@ const Orders: React.FC = () => {
           </table>
         )}
       </div>
+
+      {/* Order Detail Modal */}
+      {selectedOrder && (
+        <div className="modal-overlay">
+          <div className="modal-content order-details-modal">
+            <div className="modal-header">
+              <h3>Order Details: #{selectedOrder._id.slice(-6).toUpperCase()}</h3>
+              <button className="close-btn" onClick={() => setSelectedOrder(null)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <div className="detail-section">
+                <h4>Customer Information</h4>
+                <p><strong>Name:</strong> {selectedOrder.userId?.name || 'Guest'}</p>
+                <p><strong>Email:</strong> {selectedOrder.userId?.email}</p>
+                <p><strong>Address:</strong> {selectedOrder.shippingAddress || 'N/A'}</p>
+              </div>
+              <div className="detail-section">
+                <h4>Products</h4>
+                <table className="mini-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Size</th>
+                      <th>Qty</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.products?.map((p: any, i: number) => (
+                      <tr key={i}>
+                        <td>{p.productId?.name || 'Unknown Item'}</td>
+                        <td>{p.size}</td>
+                        <td>{p.quantity}</td>
+                        <td>LKR {p.price?.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="detail-total">
+                <p><strong>Total Amount:</strong> LKR {selectedOrder.totalAmount.toLocaleString()}</p>
+                <p><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-primary" onClick={() => downloadPDF(selectedOrder)}>
+                <Download size={18} /> Download Invoice (PDF)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

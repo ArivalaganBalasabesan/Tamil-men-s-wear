@@ -15,7 +15,7 @@ const Loyalty: React.FC = () => {
   const [stats, setStats] = useState({
     totalPoints: 0,
     activeMembers: 0,
-    pointValue: '1 Point = ₹1'
+    pointValue: '1 Point = LKR 1'
   });
 
   const getTokenConfig = () => {
@@ -35,7 +35,7 @@ const Loyalty: React.FC = () => {
       setStats({
         totalPoints: total,
         activeMembers: loyaltyUsers.length,
-        pointValue: '1 Point = ₹1'
+        pointValue: '1 Point = LKR 1'
       });
       
       setLoading(false);

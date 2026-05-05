@@ -118,7 +118,7 @@ export default function ProfileScreen({ navigation }) {
             {[
               { label: 'Orders',    value: totalOrders },
               { label: 'Delivered', value: completedOrders },
-              { label: 'Spent',     value: `₹${totalSpent > 0 ? (totalSpent/1000).toFixed(1)+'k' : 0}` },
+              { label: 'Spent',     value: `LKR ${totalSpent > 0 ? (totalSpent/1000).toFixed(1)+'k' : 0}` },
               { label: 'Points',    value: pts },
             ].map((s, i) => (
               <View key={i} style={[styles.stat, i < 3 && { borderRightWidth: 1, borderRightColor: theme.border }]}>
