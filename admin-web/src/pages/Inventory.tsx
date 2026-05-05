@@ -3,14 +3,19 @@ import { Search, ArrowUpCircle } from 'lucide-react';
 import axios from '../axios';
 import './Pages.css';
 
-interface Product {
+interface InventoryItem {
   _id: string;
-  name: string;
-  stock: number;
+  product: {
+    _id: string;
+    name: string;
+    stock: number;
+  };
+  stockLevel: number;
+  lowStockThreshold: number;
 }
 
 const Inventory: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -25,8 +30,8 @@ const Inventory: React.FC = () => {
 
   const fetchInventory = async () => {
     try {
-      const res = await axios.get('/products', getTokenConfig());
-      setProducts(res.data);
+      const res = await axios.get('/inventory', getTokenConfig());
+      setInventory(res.data);
     } catch (err) {
       console.error('Error fetching inventory', err);
     } finally {
@@ -34,17 +39,21 @@ const Inventory: React.FC = () => {
     }
   };
 
-  const updateStock = async (id: string, amount: number) => {
+  const updateInventory = async (productId: string, stockLevel?: number, threshold?: number) => {
     try {
-      await axios.put(`/admin/stock/${id}`, { stock: amount }, getTokenConfig());
+      await axios.post('/inventory/update', { 
+        product: productId, 
+        stockLevel, 
+        lowStockThreshold: threshold 
+      }, getTokenConfig());
       fetchInventory();
     } catch (err) {
-      console.error('Error updating stock', err);
+      console.error('Error updating inventory', err);
     }
   };
 
-  const filteredInventory = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInventory = inventory.filter(item => 
+    item.product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -70,31 +79,43 @@ const Inventory: React.FC = () => {
               <tr>
                 <th>Product</th>
                 <th>Current Stock</th>
+                <th>Threshold</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredInventory.map(product => (
-                <tr key={product._id}>
-                  <td className="font-bold">{product.name}</td>
-                  <td>{product.stock}</td>
+              {filteredInventory.map(item => (
+                <tr key={item._id}>
+                  <td className="font-bold">{item.product?.name}</td>
+                  <td>{item.stockLevel}</td>
+                  <td>{item.lowStockThreshold}</td>
                   <td>
-                    <span className={`stock-badge ${product.stock < 10 ? 'low-stock' : ''}`}>
-                      {product.stock < 10 ? 'Low Stock' : 'In Stock'}
+                    <span className={`stock-badge ${item.stockLevel <= item.lowStockThreshold ? 'low-stock' : ''}`}>
+                      {item.stockLevel <= item.lowStockThreshold ? 'Low Stock' : 'In Stock'}
                     </span>
                   </td>
                   <td className="actions-cell">
                     <button 
                       className="btn-primary" 
-                      style={{ padding: '6px 12px' }}
+                      style={{ padding: '6px 12px', marginRight: '8px' }}
                       onClick={() => {
-                        const newStock = prompt('Enter new stock quantity:', product.stock.toString());
-                        if (newStock !== null) updateStock(product._id, parseInt(newStock));
+                        const newStock = prompt('Enter new stock quantity:', item.stockLevel.toString());
+                        if (newStock !== null) updateInventory(item.product._id, parseInt(newStock), item.lowStockThreshold);
                       }}
                     >
                       <ArrowUpCircle size={14} />
                       <span>Update Stock</span>
+                    </button>
+                    <button 
+                      className="btn-secondary" 
+                      style={{ padding: '6px 12px' }}
+                      onClick={() => {
+                        const newThreshold = prompt('Enter new alert threshold:', item.lowStockThreshold.toString());
+                        if (newThreshold !== null) updateInventory(item.product._id, item.stockLevel, parseInt(newThreshold));
+                      }}
+                    >
+                      <span>Set Threshold</span>
                     </button>
                   </td>
                 </tr>

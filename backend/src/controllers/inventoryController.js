@@ -2,6 +2,25 @@ const Inventory = require('../models/Inventory');
 
 exports.getInventory = async (req, res) => {
   try {
+    const Product = require('../models/Product');
+    const products = await Product.find();
+    
+    // Ensure every product has an inventory record
+    for (const prod of products) {
+      const exists = await Inventory.findOne({ product: prod._id });
+      if (!exists) {
+        await new Inventory({ 
+          product: prod._id, 
+          stockLevel: prod.stock || 0,
+          lowStockThreshold: 5 
+        }).save();
+      } else if (exists.stockLevel !== prod.stock) {
+        // Sync if out of alignment
+        exists.stockLevel = prod.stock;
+        await exists.save();
+      }
+    }
+
     const inventory = await Inventory.find().populate('product');
     res.json(inventory);
   } catch (error) {
@@ -34,6 +53,11 @@ exports.updateStock = async (req, res) => {
     }
     
     await item.save();
+
+    // Sync back to Product model
+    const Product = require('../models/Product');
+    await Product.findByIdAndUpdate(product, { stock: stockLevel });
+
     res.json(item);
   } catch (error) {
     res.status(400).json({ message: error.message });

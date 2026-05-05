@@ -5,11 +5,15 @@ import { addToCart } from '../store/cartSlice';
 import { LinearGradient } from 'expo-linear-gradient';
 import { t } from '../utils/i18n';
 import api from '../services/api/api';
+import { Colors } from '../constants/Theme';
 
 export default function ProductDetailsScreen({ route, navigation }) {
   const { product } = route.params;
   const dispatch = useDispatch();
   const { user, language } = useSelector(state => state.auth);
+  const { isDark } = useSelector(state => state.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
+
   const userProfile = user?.bodyProfile;
   const [selectedSize, setSelectedSize] = useState(product.sizeAvailable?.[0] || 'M');
   const [reviews, setReviews] = useState([]);
@@ -88,16 +92,15 @@ export default function ProductDetailsScreen({ route, navigation }) {
   });
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       
-      <Animated.View style={[styles.headerBlur, { opacity: headerOpacity }]}>
-        <LinearGradient colors={['rgba(0,0,0,0.9)', 'rgba(0,0,0,0.7)']} style={StyleSheet.absoluteFill} />
-        <Text style={styles.headerTitle}>{product.name.toUpperCase()}</Text>
+      <Animated.View style={[styles.headerBlur, { opacity: headerOpacity, backgroundColor: theme.surface }]}>
+        <Text style={[styles.headerTitle, { color: theme.primary }]}>{product.name.toUpperCase()}</Text>
       </Animated.View>
 
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-        <Text style={styles.backBtnText}>←</Text>
+      <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={() => navigation.goBack()}>
+        <Text style={[styles.backBtnText, { color: theme.primary }]}>←</Text>
       </TouchableOpacity>
 
       <Animated.ScrollView 
@@ -105,69 +108,102 @@ export default function ProductDetailsScreen({ route, navigation }) {
         scrollEventThrottle={16}
       >
         <Image source={{ uri: product.images?.[0] || product.image || 'https://via.placeholder.com/300' }} style={styles.image} />
-        <LinearGradient colors={['transparent', '#0f0f0f']} style={styles.imageOverlay} />
+        <LinearGradient colors={['transparent', theme.background]} style={styles.imageOverlay} />
         
         <View style={styles.infoContainer}>
           <View style={styles.titleRow}>
             <View style={{flex: 1}}>
-              <Text style={styles.name}>{product.name || 'Product'}</Text>
-              <Text style={styles.category}>{(product.category || 'Collection').toUpperCase()}</Text>
+              <Text style={[styles.name, { color: theme.text }]}>{product.name || 'Product'}</Text>
+              <Text style={[styles.category, { color: theme.textMuted }]}>{(product.category || 'Collection').toUpperCase()}</Text>
             </View>
-            <TouchableOpacity style={styles.wishBtn} onPress={handleWishlist}>
+            <TouchableOpacity style={[styles.wishBtn, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={handleWishlist}>
               <Text style={styles.heartIcon}>❤️</Text>
             </TouchableOpacity>
           </View>
           
-          <Text style={styles.price}>Rs. {product.price || 0}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, marginTop: 10 }}>
+            <Text style={[styles.price, { color: theme.primary, marginTop: 0 }]}>LKR {product.price || 0}</Text>
+            <View style={[
+              styles.stockBadgeDetail, 
+              { backgroundColor: (product.stock > 0) ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderColor: (product.stock > 0) ? '#22C55E' : '#EF4444' }
+            ]}>
+              <Text style={[styles.stockTextDetail, { color: (product.stock > 0) ? '#22C55E' : '#EF4444' }]}>
+                {(product.stock > 0) ? 'IN STOCK' : 'OUT OF STOCK'}
+              </Text>
+            </View>
+          </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-          <Text style={styles.sectionTitle}>{t(language, 'selectSize').toUpperCase()}</Text>
+          <Text style={[styles.sectionTitle, { color: theme.primary }]}>{t(language, 'selectSize').toUpperCase()}</Text>
           <View style={styles.sizeContainer}>
             {(product.sizeAvailable || product.sizes || ['S','M','L']).map(size => (
               <TouchableOpacity 
                 key={size} 
-                style={[styles.sizeBtn, selectedSize === size && styles.selectedSizeBtn]}
+                style={[
+                  styles.sizeBtn, 
+                  { borderColor: theme.border },
+                  selectedSize === size && { backgroundColor: theme.primary, borderColor: theme.primary }
+                ]}
                 onPress={() => setSelectedSize(size)}
               >
-                <Text style={[styles.sizeText, selectedSize === size && styles.selectedSizeText]}>{size}</Text>
+                <Text style={[
+                  styles.sizeText, 
+                  { color: theme.primary },
+                  selectedSize === size && { color: '#000' }
+                ]}>{size}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {recommendedSize && (
-            <View style={styles.smartSizeCard}>
-              <Text style={styles.smartSize}>{t(language, 'smartRec')} {recommendedSize}</Text>
+            <View style={[styles.smartSizeCard, { backgroundColor: theme.surface, borderColor: theme.primary }]}>
+              <Text style={[styles.smartSize, { color: theme.primary }]}>{t(language, 'smartRec')} {recommendedSize}</Text>
             </View>
           )}
 
-          <Text style={styles.description}>{product.description}</Text>
+          <Text style={[styles.description, { color: theme.textSub }]}>{product.description}</Text>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
           <View style={styles.reviewSection}>
-            <Text style={styles.sectionTitle}>REVIEWS ({reviews.length})</Text>
+            <Text style={[styles.sectionTitle, { color: theme.primary }]}>REVIEWS ({reviews.length})</Text>
             {reviews.length === 0 ? (
-              <Text style={styles.noReviews}>No reviews yet. Be the first to share your experience!</Text>
+              <Text style={[styles.noReviews, { color: theme.textMuted }]}>No reviews yet. Be the first to share your experience!</Text>
             ) : (
               reviews.map(r => (
-                <View key={r._id} style={styles.reviewCard}>
+                <View key={r._id} style={[styles.reviewCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                   <View style={styles.reviewHeader}>
-                    <Text style={styles.reviewUser}>{r.userId?.name || 'User'}</Text>
+                    <Text style={[styles.reviewUser, { color: theme.text }]}>{r.userId?.name || 'User'}</Text>
                     <Text style={styles.rating}>{'⭐'.repeat(r.rating)}</Text>
                   </View>
-                  <Text style={styles.reviewText}>{r.comment}</Text>
+                  <Text style={[styles.reviewText, { color: theme.textSub }]}>{r.comment}</Text>
                 </View>
               ))
             )}
             
-            <View style={styles.addReviewBox}>
-              <Text style={styles.sectionTitle}>WRITE A REVIEW</Text>
+            <View style={[styles.addReviewBox, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.sectionTitle, { color: theme.primary }]}>WRITE A REVIEW</Text>
               <View style={styles.reviewInputs}>
-                <TextInput style={styles.ratingInput} placeholder="5" placeholderTextColor="#888" keyboardType="numeric" value={rating} onChangeText={setRating} maxLength={1} />
-                <TextInput style={styles.reviewInput} placeholder="Tell us what you think..." placeholderTextColor="#888" value={reviewText} onChangeText={setReviewText} multiline />
+                <TextInput 
+                  style={[styles.ratingInput, { backgroundColor: theme.background, color: theme.primary, borderColor: theme.border }]} 
+                  placeholder="5" 
+                  placeholderTextColor={theme.textMuted} 
+                  keyboardType="numeric" 
+                  value={rating} 
+                  onChangeText={setRating} 
+                  maxLength={1} 
+                />
+                <TextInput 
+                  style={[styles.reviewInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]} 
+                  placeholder="Tell us what you think..." 
+                  placeholderTextColor={theme.textMuted} 
+                  value={reviewText} 
+                  onChangeText={setReviewText} 
+                  multiline 
+                />
               </View>
-              <TouchableOpacity style={styles.reviewBtn} onPress={submitReview}>
+              <TouchableOpacity style={[styles.reviewBtn, { backgroundColor: theme.primary }]} onPress={submitReview}>
                 <Text style={styles.reviewBtnText}>SUBMIT REVIEW</Text>
               </TouchableOpacity>
             </View>
@@ -176,9 +212,19 @@ export default function ProductDetailsScreen({ route, navigation }) {
         </View>
       </Animated.ScrollView>
 
-      <LinearGradient colors={['transparent', 'rgba(15,15,15,0.8)', '#0f0f0f']} style={styles.bottomBar}>
-        <TouchableOpacity style={styles.addBtn} onPress={handleAddToCart}>
-          <Text style={styles.addBtnText}>{t(language, 'addToCart').toUpperCase()}</Text>
+      <LinearGradient colors={['transparent', theme.background]} style={styles.bottomBar}>
+        <TouchableOpacity 
+          style={[
+            styles.addBtn, 
+            { backgroundColor: theme.primary },
+            (product.stock <= 0) && { backgroundColor: theme.textMuted, opacity: 0.5 }
+          ]} 
+          onPress={handleAddToCart}
+          disabled={product.stock <= 0}
+        >
+          <Text style={styles.addBtnText}>
+            {(product.stock > 0) ? t(language, 'addToCart').toUpperCase() : 'OUT OF STOCK'}
+          </Text>
         </TouchableOpacity>
       </LinearGradient>
     </View>
@@ -186,44 +232,44 @@ export default function ProductDetailsScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f0f' },
+  container: { flex: 1 },
   headerBlur: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, zIndex: 10, justifyContent: 'flex-end', paddingBottom: 15, alignItems: 'center' },
-  headerTitle: { color: '#FFD700', fontWeight: '900', letterSpacing: 2, fontSize: 14 },
-  backBtn: { position: 'absolute', top: 50, left: 20, zIndex: 20, backgroundColor: 'rgba(0,0,0,0.5)', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)' },
-  backBtnText: { color: '#FFD700', fontSize: 20, fontWeight: 'bold' },
+  headerTitle: { fontWeight: '900', letterSpacing: 2, fontSize: 14 },
+  backBtn: { position: 'absolute', top: 50, left: 20, zIndex: 20, width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+  backBtnText: { fontSize: 20, fontWeight: 'bold' },
   image: { width: '100%', height: 500, resizeMode: 'cover' },
   imageOverlay: { position: 'absolute', top: 300, height: 200, width: '100%' },
   infoContainer: { padding: 25, marginTop: -20 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  name: { fontSize: 28, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
-  category: { color: '#888', fontSize: 12, fontWeight: 'bold', letterSpacing: 2, marginTop: 4 },
-  wishBtn: { padding: 10, backgroundColor: 'rgba(255,215,0,0.05)', borderRadius: 25, borderWidth: 1, borderColor: 'rgba(255,215,0,0.2)' },
+  name: { fontSize: 28, fontWeight: '900', letterSpacing: 0.5 },
+  category: { fontSize: 12, fontWeight: 'bold', letterSpacing: 2, marginTop: 4 },
+  wishBtn: { padding: 10, borderRadius: 25, borderWidth: 1 },
   heartIcon: { fontSize: 22 },
-  price: { fontSize: 24, color: '#FFD700', fontWeight: '900', marginTop: 10 },
-  divider: { height: 1, backgroundColor: 'rgba(255,215,0,0.1)', marginVertical: 30 },
-  sectionTitle: { color: '#FFD700', fontSize: 13, marginBottom: 15, fontWeight: '900', letterSpacing: 2 },
+  price: { fontSize: 24, fontWeight: '900', marginTop: 10 },
+  stockBadgeDetail: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  stockTextDetail: { fontSize: 10, fontWeight: '900', letterSpacing: 1 },
+  divider: { height: 1, marginVertical: 30 },
+  sectionTitle: { fontSize: 13, marginBottom: 15, fontWeight: '900', letterSpacing: 2 },
   sizeContainer: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
-  sizeBtn: { padding: 14, borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)', borderRadius: 8, minWidth: 60, alignItems: 'center' },
-  selectedSizeBtn: { backgroundColor: '#FFD700', borderColor: '#FFD700' },
-  sizeText: { color: '#FFD700', fontWeight: 'bold' },
-  selectedSizeText: { color: '#000', fontWeight: '900' },
-  smartSizeCard: { marginTop: 20, backgroundColor: 'rgba(255,215,0,0.05)', padding: 15, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)', borderStyle: 'dashed' },
-  smartSize: { color: '#FFD700', fontStyle: 'italic', fontSize: 13, fontWeight: '500' },
-  description: { color: '#aaa', marginTop: 10, lineHeight: 26, fontSize: 16, letterSpacing: 0.3 },
+  sizeBtn: { padding: 14, borderWidth: 1, borderRadius: 8, minWidth: 60, alignItems: 'center' },
+  sizeText: { fontWeight: 'bold' },
+  smartSizeCard: { marginTop: 20, padding: 15, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed' },
+  smartSize: { fontStyle: 'italic', fontSize: 13, fontWeight: '500' },
+  description: { marginTop: 10, lineHeight: 26, fontSize: 16, letterSpacing: 0.3 },
   reviewSection: { marginTop: 10 },
-  noReviews: { color: '#666', fontStyle: 'italic' },
-  reviewCard: { backgroundColor: 'rgba(255,215,0,0.03)', padding: 18, borderRadius: 12, marginBottom: 15, borderWidth: 1, borderColor: 'rgba(255,215,0,0.1)' },
+  noReviews: { fontStyle: 'italic' },
+  reviewCard: { padding: 18, borderRadius: 12, marginBottom: 15, borderWidth: 1 },
   reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  reviewUser: { color: '#fff', fontWeight: 'bold' },
+  reviewUser: { fontWeight: 'bold' },
   rating: { fontSize: 12 },
-  reviewText: { color: '#bbb', lineHeight: 20 },
-  addReviewBox: { marginTop: 40, backgroundColor: 'rgba(255,215,0,0.05)', padding: 20, borderRadius: 12 },
+  reviewText: { lineHeight: 20 },
+  addReviewBox: { marginTop: 40, padding: 20, borderRadius: 12 },
   reviewInputs: { flexDirection: 'row', gap: 12, marginBottom: 15 },
-  ratingInput: { width: 50, backgroundColor: '#000', color: '#FFD700', textAlign: 'center', borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,215,0,0.2)', fontWeight: 'bold' },
-  reviewInput: { flex: 1, backgroundColor: '#000', color: '#fff', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,215,0,0.2)', height: 50 },
-  reviewBtn: { backgroundColor: '#FFD700', padding: 15, borderRadius: 8, alignItems: 'center' },
+  ratingInput: { width: 50, textAlign: 'center', borderRadius: 8, borderWidth: 1, fontWeight: 'bold' },
+  reviewInput: { flex: 1, padding: 12, borderRadius: 8, borderWidth: 1, height: 50 },
+  reviewBtn: { padding: 15, borderRadius: 8, alignItems: 'center' },
   reviewBtnText: { color: '#000', fontWeight: '900', letterSpacing: 1 },
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 25, paddingTop: 40 },
-  addBtn: { backgroundColor: '#FFD700', padding: 20, borderRadius: 12, alignItems: 'center', shadowColor: '#FFD700', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.4, shadowRadius: 15, elevation: 10 },
+  addBtn: { padding: 20, borderRadius: 12, alignItems: 'center', elevation: 10 },
   addBtnText: { color: '#000', fontWeight: '900', fontSize: 18, letterSpacing: 2 }
 });

@@ -20,6 +20,10 @@ jest.mock('../models/Inventory', () => {
   return Mock;
 });
 
+jest.mock('../models/Product', () => ({
+  findByIdAndUpdate: jest.fn().mockResolvedValue(true)
+}));
+
 const inventoryRoutes = require('../routes/inventoryRoutes');
 const app = express();
 app.use(express.json());

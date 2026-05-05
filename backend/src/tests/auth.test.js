@@ -44,21 +44,21 @@ app.use('/api/auth', authRoutes);
 describe('Member 1: Auth & Profile (6 Tests)', () => {
   it('1. Register success', async () => {
     User.findOne.mockResolvedValue(null);
-    const res = await request(app).post('/api/auth/register').send({ name: 'T', email: 't@t.com', password: '1' });
+    const res = await request(app).post('/api/auth/register').send({ name: 'T', email: 't@t.com', password: 'password123' });
     expect(res.statusCode).toEqual(200);
   });
   it('2. Register validation (missing email)', async () => {
     const res = await request(app).post('/api/auth/register').send({ name: 'T' });
-    expect(res.statusCode).toEqual(500); // Mongoose throw results in 500 in your controller
+    expect(res.statusCode).toEqual(400); // Updated: My new validation returns 400
   });
   it('3. Register existing', async () => {
     User.findOne.mockResolvedValue({ email: 't@t.com' });
-    const res = await request(app).post('/api/auth/register').send({ name: 'T', email: 't@t.com', password: '1' });
+    const res = await request(app).post('/api/auth/register').send({ name: 'T', email: 't@t.com', password: 'password123' });
     expect(res.statusCode).toEqual(400);
   });
   it('4. Login success', async () => {
     User.findOne.mockResolvedValue({ _id: '123', email: 't@t.com', password: 'h' });
-    const res = await request(app).post('/api/auth/login').send({ email: 't@t.com', password: '1' });
+    const res = await request(app).post('/api/auth/login').send({ email: 't@t.com', password: 'password123' });
     expect(res.statusCode).toEqual(200);
   });
   it('5. Login fail', async () => {

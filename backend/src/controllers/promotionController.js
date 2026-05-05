@@ -1,4 +1,5 @@
 const Promotion = require('../models/Promotion');
+const { validatePromotion } = require('../validations/promotionValidation');
 
 exports.getPromotions = async (req, res) => {
   try {
@@ -20,6 +21,9 @@ exports.getAllPromotions = async (req, res) => {
 
 exports.createPromotion = async (req, res) => {
   try {
+    const { isValid, errors } = validatePromotion(req.body);
+    if (!isValid) return res.status(400).json({ message: errors[0] });
+
     const promotion = new Promotion(req.body);
     await promotion.save();
     res.status(201).json(promotion);

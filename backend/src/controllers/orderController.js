@@ -1,11 +1,16 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const { validateOrder } = require('../validations/orderValidation');
 
 exports.createOrder = async (req, res) => {
   try {
     const { products, totalAmount } = req.body;
     const userId = req.user.id;
+
+    // Validations
+    const { isValid, errors } = validateOrder(req.body);
+    if (!isValid) return res.status(400).json({ msg: errors[0] });
 
     const newOrder = new Order({
       userId,
@@ -20,9 +25,15 @@ exports.createOrder = async (req, res) => {
 
     const order = await newOrder.save();
 
-    // Decrease Stock
+    // Decrease Stock & Sync Inventory
+    const Inventory = require('../models/Inventory');
     for (const p of products) {
       await Product.findByIdAndUpdate(p.productId, { $inc: { stock: -p.quantity } });
+      await Inventory.findOneAndUpdate(
+        { product: p.productId },
+        { $inc: { stockLevel: -p.quantity } },
+        { upsert: true }
+      );
     }
 
     // Loyalty Points (1 point per 100)

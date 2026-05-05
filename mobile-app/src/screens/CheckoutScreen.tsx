@@ -5,9 +5,12 @@ import { clearCart } from '../store/cartSlice';
 import { LinearGradient } from 'expo-linear-gradient';
 import api from '../services/api/api';
 import { validateEmail, validatePhone, isNotEmpty } from '../utils/validation';
+import { Colors } from '../constants/Theme';
 
 export default function CheckoutScreen({ navigation }) {
   const { items, total } = useSelector(state => state.cart);
+  const { isDark } = useSelector(state => state.theme);
+  const theme = isDark ? Colors.dark : Colors.light;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +32,7 @@ export default function CheckoutScreen({ navigation }) {
       const promo = res.data;
       
       if (total < promo.minPurchaseAmount) {
-        Alert.alert('Invalid', `Minimum purchase of Rs. ${promo.minPurchaseAmount} required for this code.`);
+        Alert.alert('Invalid', `Minimum purchase of LKR ${promo.minPurchaseAmount} required for this code.`);
         return;
       }
 
@@ -41,7 +44,7 @@ export default function CheckoutScreen({ navigation }) {
       }
       
       setDiscount(calcDiscount);
-      Alert.alert('Success', `Promo applied! You saved Rs. ${calcDiscount}`);
+      Alert.alert('Success', `Promo applied! You saved LKR ${calcDiscount}`);
     } catch (err) {
       Alert.alert('Error', 'Invalid or expired promo code');
       setDiscount(0);
@@ -76,7 +79,7 @@ export default function CheckoutScreen({ navigation }) {
       const orderRes = await api.post('/orders', { 
         products: formatProducts, 
         totalAmount: finalAmount, 
-        shippingAddress: shippingDetails.address, // API expects shippingAddress as string
+        shippingAddress: shippingDetails.address, 
         customerName: shippingDetails.name,
         customerPhone: shippingDetails.phone,
         customerEmail: shippingDetails.email
@@ -101,33 +104,33 @@ export default function CheckoutScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient colors={['#0a0a0a', '#171300']} style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={styles.backBtnText}>←</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={() => navigation.goBack()}>
+          <Text style={[styles.backBtnText, { color: theme.primary }]}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.header}>CHECKOUT</Text>
+        <Text style={[styles.header, { color: theme.primary }]}>CHECKOUT</Text>
         
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryText}>TOTAL ITEMS: {items.reduce((acc, item) => acc + item.quantity, 0)}</Text>
-          <Text style={styles.summaryText}>SUBTOTAL: Rs. {total}</Text>
-          {discount > 0 && <Text style={[styles.summaryText, { color: '#22c55e' }]}>DISCOUNT: -Rs. {discount}</Text>}
-          <Text style={[styles.summaryText, { fontSize: 20, borderTopWidth: 1, borderTopColor: '#333', paddingTop: 10 }]}>FINAL TOTAL: Rs. {total - discount}</Text>
+        <View style={[styles.summaryBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Text style={[styles.summaryText, { color: theme.text }]}>TOTAL ITEMS: {items.reduce((acc, item) => acc + item.quantity, 0)}</Text>
+          <Text style={[styles.summaryText, { color: theme.text }]}>SUBTOTAL: LKR {total}</Text>
+          {discount > 0 && <Text style={[styles.summaryText, { color: '#22c55e' }]}>DISCOUNT: -LKR {discount}</Text>}
+          <Text style={[styles.summaryText, { color: theme.text, fontSize: 20, borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 10, marginTop: 5 }]}>FINAL TOTAL: LKR {total - discount}</Text>
         </View>
 
-        <Text style={styles.subHeader}>PROMO CODE</Text>
+        <Text style={[styles.subHeader, { color: theme.primary }]}>PROMO CODE</Text>
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 30 }}>
           <TextInput 
-            style={[styles.input, { flex: 1, marginBottom: 0 }]} 
+            style={[styles.input, { flex: 1, marginBottom: 0, backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]} 
             placeholder="Enter Code" 
-            placeholderTextColor="#666"
+            placeholderTextColor={theme.textMuted}
             value={promoCode}
             onChangeText={setPromoCode}
             autoCapitalize="characters"
           />
           <TouchableOpacity 
-            style={[styles.applyBtn, { opacity: promoLoading ? 0.6 : 1 }]} 
+            style={[styles.applyBtn, { backgroundColor: theme.primary, opacity: promoLoading ? 0.6 : 1 }]} 
             onPress={applyPromo}
             disabled={promoLoading}
           >
@@ -135,20 +138,20 @@ export default function CheckoutScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.subHeader}>SHIPPING DETAILS</Text>
+        <Text style={[styles.subHeader, { color: theme.primary }]}>SHIPPING DETAILS</Text>
         
         <TextInput 
-          style={styles.input} 
+          style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]} 
           placeholder="Full Name" 
-          placeholderTextColor="#666"
+          placeholderTextColor={theme.textMuted}
           value={shippingDetails.name}
           onChangeText={t => setShippingDetails({...shippingDetails, name: t})}
         />
         
         <TextInput 
-          style={[styles.input, shippingDetails.email && !validateEmail(shippingDetails.email) && { borderColor: '#ff4444' }]} 
+          style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }, shippingDetails.email && !validateEmail(shippingDetails.email) && { borderColor: '#ff4444' }]} 
           placeholder="Email Address" 
-          placeholderTextColor="#666"
+          placeholderTextColor={theme.textMuted}
           keyboardType="email-address"
           autoCapitalize="none"
           value={shippingDetails.email}
@@ -157,18 +160,18 @@ export default function CheckoutScreen({ navigation }) {
         {shippingDetails.email && !validateEmail(shippingDetails.email) && <Text style={styles.errorText}>Please enter a valid email address</Text>}
 
         <TextInput 
-          style={styles.input} 
+          style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]} 
           placeholder="Phone Number (10 digits)" 
-          placeholderTextColor="#666"
+          placeholderTextColor={theme.textMuted}
           keyboardType="phone-pad"
           maxLength={10}
           value={shippingDetails.phone}
           onChangeText={t => setShippingDetails({...shippingDetails, phone: t})}
         />
         <TextInput 
-          style={[styles.input, { height: 100 }]} 
+          style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border, height: 100 }]} 
           placeholder="Full Delivery Address" 
-          placeholderTextColor="#666"
+          placeholderTextColor={theme.textMuted}
           multiline
           textAlignVertical="top"
           value={shippingDetails.address}
@@ -176,7 +179,7 @@ export default function CheckoutScreen({ navigation }) {
         />
 
         <TouchableOpacity 
-          style={[styles.payBtn, loading && { opacity: 0.7 }]} 
+          style={[styles.payBtn, { backgroundColor: theme.primary, opacity: loading ? 0.7 : 1 }]} 
           onPress={handlePayment} 
           disabled={loading}
         >
@@ -190,22 +193,22 @@ export default function CheckoutScreen({ navigation }) {
           )}
         </TouchableOpacity>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 25, paddingTop: 60 },
-  header: { fontSize: 26, fontWeight: '900', color: '#FFD700', marginBottom: 20, letterSpacing: 2 },
-  subHeader: { fontSize: 14, fontWeight: 'bold', color: '#FFD700', marginBottom: 15, letterSpacing: 1 },
-  summaryBox: { backgroundColor: 'rgba(255,215,0,0.05)', padding: 25, borderRadius: 12, marginBottom: 30, borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)' },
-  summaryText: { color: '#fff', fontSize: 16, marginBottom: 10, fontWeight: 'bold', letterSpacing: 1 },
-  input: { backgroundColor: '#111', color: '#fff', padding: 18, borderRadius: 12, borderWidth: 1, borderColor: '#332b00', marginBottom: 15, fontSize: 15 },
+  container: { flex: 1, paddingHorizontal: 25, paddingTop: 60 },
+  header: { fontSize: 26, fontWeight: '900', marginBottom: 20, letterSpacing: 2 },
+  subHeader: { fontSize: 14, fontWeight: 'bold', marginBottom: 15, letterSpacing: 1 },
+  summaryBox: { padding: 25, borderRadius: 12, marginBottom: 30, borderWidth: 1 },
+  summaryText: { fontSize: 16, marginBottom: 10, fontWeight: 'bold', letterSpacing: 1 },
+  input: { padding: 18, borderRadius: 12, borderWidth: 1, marginBottom: 15, fontSize: 15 },
   errorText: { color: '#ff4444', fontSize: 12, marginTop: -10, marginBottom: 15, marginLeft: 5 },
-  payBtn: { backgroundColor: '#FFD700', padding: 20, borderRadius: 12, alignItems: 'center', marginTop: 10, shadowColor: '#FFD700', shadowOffset: {width:0, height:4}, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
+  payBtn: { padding: 20, borderRadius: 12, alignItems: 'center', marginTop: 10, elevation: 5 },
   payBtnText: { color: '#000', fontWeight: '900', fontSize: 16, letterSpacing: 1 },
-  applyBtn: { backgroundColor: '#FFD700', paddingHorizontal: 20, justifyContent: 'center', borderRadius: 12 },
+  applyBtn: { paddingHorizontal: 20, justifyContent: 'center', borderRadius: 12 },
   applyBtnText: { color: '#000', fontWeight: 'bold', fontSize: 13 },
-  backBtn: { marginBottom: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,215,0,0.1)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)' },
-  backBtnText: { color: '#FFD700', fontSize: 20, fontWeight: 'bold' }
+  backBtn: { marginBottom: 20, width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+  backBtnText: { fontSize: 20, fontWeight: 'bold' }
 });

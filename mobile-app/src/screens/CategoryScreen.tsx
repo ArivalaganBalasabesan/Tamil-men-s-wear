@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector } from 'react-redux';
+import { Colors } from '../constants/Theme';
 import api from '../services/api/api';
 
 const { width } = Dimensions.get('window');
@@ -74,7 +76,7 @@ export default function CategoryScreen({ navigation }) {
 
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('Search', { category: item.name })}
+        onPress={() => navigation.navigate('Main', { screen: 'Search', params: { category: item.name } })}
         activeOpacity={0.85}
         style={styles.cardWrapper}
       >
@@ -115,7 +117,7 @@ export default function CategoryScreen({ navigation }) {
             <Text style={[styles.headerTitle, { color: theme.text }]}>Categories</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Search')} style={[styles.searchBtn, { backgroundColor: theme.card }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Search' })} style={[styles.searchBtn, { backgroundColor: theme.card }]}>
           <Icon name="search" size={20} color={theme.primary} />
         </TouchableOpacity>
       </LinearGradient>

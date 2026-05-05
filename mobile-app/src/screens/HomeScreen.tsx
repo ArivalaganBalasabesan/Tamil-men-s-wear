@@ -55,7 +55,15 @@ const HomeScreen = ({ navigation }) => {
       style={[styles.productCard, { backgroundColor: theme.card }]}
       onPress={() => navigation.navigate('ProductDetails', { product: item })}
     >
-      <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+      <View>
+        <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+        <View style={[
+          styles.stockBadge, 
+          { backgroundColor: (item.stock > 0) ? '#22C55E' : '#EF4444' }
+        ]}>
+          <Text style={styles.stockText}>{(item.stock > 0) ? 'IN STOCK' : 'OUT OF STOCK'}</Text>
+        </View>
+      </View>
       <View style={styles.productInfo}>
         <Text style={[styles.productName, { color: theme.text }]} numberOfLines={1}>{item.name}</Text>
         <Text style={[styles.productPrice, { color: theme.primary }]}>LKR {(item.price || 0).toLocaleString()}</Text>
@@ -131,7 +139,9 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Trending Now</Text>
-            <TouchableOpacity><Text style={{ color: theme.primary, fontWeight: '600' }}>See All</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Search' })}>
+              <Text style={{ color: theme.primary, fontWeight: '600' }}>See All</Text>
+            </TouchableOpacity>
           </View>
           {loading ? (
             <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }} />
@@ -153,17 +163,25 @@ const HomeScreen = ({ navigation }) => {
         <View style={[styles.section, { marginBottom: 120 }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Just For You</Text>
           <View style={styles.grid}>
-            {filteredProducts.slice(0, 4).map(product => (
-               <TouchableOpacity 
-                  key={product._id}
-                  style={[styles.gridCard, { backgroundColor: theme.card }]}
-                  onPress={() => navigation.navigate('ProductDetails', { product })}
-                >
-                  <Image source={{ uri: product.images?.[0] || 'https://via.placeholder.com/150' }} style={styles.gridImage} />
-                  <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={1}>{product.name}</Text>
-                  <Text style={[styles.gridPrice, { color: theme.primary }]}>LKR {product.price || 0}</Text>
-               </TouchableOpacity>
-            ))}
+             {filteredProducts.slice(0, 4).map(product => (
+                <TouchableOpacity 
+                   key={product._id}
+                   style={[styles.gridCard, { backgroundColor: theme.card }]}
+                   onPress={() => navigation.navigate('ProductDetails', { product })}
+                 >
+                   <View>
+                     <Image source={{ uri: product.images?.[0] || 'https://via.placeholder.com/150' }} style={styles.gridImage} />
+                     <View style={[
+                       styles.stockBadgeGrid, 
+                       { backgroundColor: (product.stock > 0) ? '#22C55E' : '#EF4444' }
+                     ]}>
+                       <Text style={styles.stockTextGrid}>{(product.stock > 0) ? 'IN STOCK' : 'OUT OF STOCK'}</Text>
+                     </View>
+                   </View>
+                   <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={1}>{product.name}</Text>
+                   <Text style={[styles.gridPrice, { color: theme.primary }]}>LKR {product.price || 0}</Text>
+                </TouchableOpacity>
+             ))}
           </View>
         </View>
       </ScrollView>
@@ -210,6 +228,10 @@ const styles = StyleSheet.create({
   gridImage: { width: '100%', height: 150, borderRadius: 12, marginBottom: 10 },
   gridName: { fontSize: 13, fontWeight: '600' },
   gridPrice: { fontSize: 14, fontWeight: '800', marginTop: 4 },
+  stockBadge: { position: 'absolute', top: 10, left: 10, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, zIndex: 5 },
+  stockText: { color: '#FFF', fontSize: 9, fontWeight: '800' },
+  stockBadgeGrid: { position: 'absolute', top: 5, left: 5, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4, zIndex: 5 },
+  stockTextGrid: { color: '#FFF', fontSize: 8, fontWeight: '800' },
 });
 
 export default HomeScreen;

@@ -29,23 +29,27 @@ app.use('/api/orders', orderRoutes);
 
 describe('Member 4: Cart & Orders (6 Tests)', () => {
   it('13. Place order', async () => {
-    const res = await request(app).post('/api/orders').send({ products: [{ productId: '1', quantity: 1, price: 100 }], totalAmount: 100 });
+    const res = await request(app).post('/api/orders').send({ 
+      products: [{ productId: '1', quantity: 1, price: 100 }], 
+      totalAmount: 100,
+      shippingAddress: 'Colombo, Sri Lanka'
+    });
     expect(res.statusCode).toBeDefined();
   });
   it('14. Prevent empty', async () => {
     const res = await request(app).post('/api/orders').send({ products: [] });
-    expect(res.statusCode).toBeDefined();
+    expect(res.statusCode).toEqual(400); // Should catch empty products
   });
   it('15. Order history', async () => {
-    const res = await request(app).get('/api/orders/user/123');
+    const res = await request(app).get('/api/orders/user');
     expect(res.statusCode).toEqual(200);
   });
   it('16. Update status', async () => {
-    const res = await request(app).put('/api/orders/123').send({ status: 'Shipped' });
+    const res = await request(app).put('/api/orders/123/status').send({ status: 'Shipped' });
     expect(res.statusCode).toEqual(200);
   });
   it('17. Cancel order', async () => {
-    const res = await request(app).put('/api/orders/123').send({ status: 'Cancelled' });
+    const res = await request(app).put('/api/orders/123/status').send({ status: 'Cancelled' });
     expect(res.statusCode).toEqual(200);
   });
   it('18. Bulk queries', async () => {

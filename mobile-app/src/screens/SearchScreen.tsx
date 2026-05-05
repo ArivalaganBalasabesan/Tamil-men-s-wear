@@ -13,16 +13,18 @@ const { width } = Dimensions.get('window');
 
 const SORT_OPTIONS = ['Newest', 'Price: Low to High', 'Price: High to Low', 'Top Rated'];
 
-export default function SearchScreen() {
+export default function SearchScreen({ route }) {
   const { isDark } = useSelector(s => s.theme);
   const theme = isDark ? Colors.dark : Colors.light;
   const shadow = isDark ? Shadows.dark : Shadows.light;
   const navigation = useNavigation();
+  
+  const initialCategory = route?.params?.category || 'All';
   const [query,      setQuery]      = useState('');
   const [products,   setProducts]   = useState([]);
   const [filtered,   setFiltered]   = useState([]);
   const [loading,    setLoading]    = useState(false);
-  const [category,   setCategory]   = useState('All');
+  const [category,   setCategory]   = useState(initialCategory);
   const [categories, setCategories] = useState(['All']);
   const [sortBy,     setSortBy]     = useState('Newest');
   const [showFilter, setShowFilter] = useState(false);
@@ -33,6 +35,13 @@ export default function SearchScreen() {
   const inputRef   = useRef(null);
 
   useEffect(() => { fetchProducts(); fetchCategories(); }, []);
+  
+  useEffect(() => {
+    if (route?.params?.category) {
+      setCategory(route.params.category);
+    }
+  }, [route?.params?.category]);
+
   useEffect(() => { applyFilters(); }, [query, category, sortBy, minPrice, maxPrice, products]);
 
   useEffect(() => {
@@ -97,6 +106,12 @@ export default function SearchScreen() {
         ) : (
           <Text style={styles.cardEmoji}>👔</Text>
         )}
+        <View style={[
+          styles.searchStockBadge, 
+          { backgroundColor: (item.stock > 0) ? '#22C55E' : '#EF4444' }
+        ]}>
+          <Text style={styles.searchStockText}>{(item.stock > 0) ? 'IN' : 'OUT'}</Text>
+        </View>
       </View>
       <View style={styles.cardInfo}>
         <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
@@ -261,4 +276,6 @@ const styles = StyleSheet.create({
   emptyIcon:          { fontSize: 48, marginBottom: 12 },
   emptyText:          { color: '#FFF', fontSize: 18, fontWeight: '600' },
   emptySubText:       { color: '#666', fontSize: 14, marginTop: 4 },
+  searchStockBadge:   { position: 'absolute', top: 5, right: 5, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, zIndex: 10 },
+  searchStockText:    { color: '#FFF', fontSize: 8, fontWeight: '800' },
 });
