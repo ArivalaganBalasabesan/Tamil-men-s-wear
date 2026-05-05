@@ -76,9 +76,10 @@ const Promotions: React.FC = () => {
       setShowModal(false);
       setEditingPromo(null);
       fetchPromotions();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving promotion:', err);
-      alert('Error saving promotion. Please check if the code already exists.');
+      const msg = err.response?.data?.message || 'Error saving promotion. Please check your network.';
+      alert(msg);
     }
   };
 

@@ -12,17 +12,27 @@ exports.getPromotions = async (req, res) => {
 
 exports.createPromotion = async (req, res) => {
   try {
-    const { isValid, errors } = validatePromotion(req.body);
-    if (!isValid) return res.status(400).json({ message: errors[0] });
+    const { code, discountType, discountValue, minPurchaseAmount, startDate, expiryDate, endDate, description } = req.body;
+    
+    const finalExpiry = expiryDate || endDate;
+    
+    if (!finalExpiry) {
+      return res.status(400).json({ message: 'Expiry date is required' });
+    }
 
-    const existing = await Promotion.findOne({ code: req.body.code.toUpperCase() });
+    const existing = await Promotion.findOne({ code: code.toUpperCase() });
     if (existing) return res.status(400).json({ message: 'Promotion code already exists' });
 
     const promo = new Promotion({
-      ...req.body,
-      code: req.body.code.toUpperCase()
+      code: code.toUpperCase(),
+      discountType,
+      discountValue,
+      minPurchaseAmount,
+      startDate: startDate || new Date(),
+      expiryDate: finalExpiry,
+      description
     });
-
+    
     await promo.save();
     res.status(201).json(promo);
   } catch (err) {
@@ -32,11 +42,11 @@ exports.createPromotion = async (req, res) => {
 
 exports.updatePromotion = async (req, res) => {
   try {
-    const promo = await Promotion.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true }
-    );
+    const { expiryDate, endDate } = req.body;
+    const updateData = { ...req.body };
+    if (endDate && !expiryDate) updateData.expiryDate = endDate;
+
+    const promo = await Promotion.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!promo) return res.status(404).json({ message: 'Promotion not found' });
     res.json(promo);
   } catch (err) {
