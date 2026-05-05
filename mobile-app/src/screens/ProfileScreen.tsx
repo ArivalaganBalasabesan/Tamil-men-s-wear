@@ -64,15 +64,34 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout', style: 'destructive', onPress: async () => {
-          await AsyncStorage.multiRemove(['token', 'user']);
-          dispatch(logout());
+    Alert.alert(
+      'Logout', 
+      'Are you sure you want to logout?', 
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              // 1. Clear Storage
+              await AsyncStorage.removeItem('token');
+              await AsyncStorage.removeItem('user');
+              
+              // 2. Reset Redux State
+              dispatch(logout());
+              
+              // 3. Optional: Reset API headers if needed
+              // api.defaults.headers.common['Authorization'] = '';
+            } catch (err) {
+              console.error('Logout error:', err);
+              // Fallback: still dispatch logout
+              dispatch(logout());
+            }
+          }
         }
-      }
-    ]);
+      ]
+    );
   };
 
   const handleMenuPress = (item) => {
