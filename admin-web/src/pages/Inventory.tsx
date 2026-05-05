@@ -114,8 +114,12 @@ const Inventory: React.FC = () => {
                       className="btn-primary" 
                       style={{ padding: '6px 12px', marginRight: '8px' }}
                       onClick={() => {
-                        const newStock = prompt('Enter new stock quantity:', item.stockLevel.toString());
-                        if (newStock !== null) updateInventory(item.product?._id || '', parseInt(newStock), item.lowStockThreshold);
+                        const input = prompt('Enter new stock quantity:', item.stockLevel.toString());
+                        if (input !== null) {
+                          const val = parseInt(input);
+                          if (isNaN(val) || val < 0) return alert('Please enter a valid non-negative number');
+                          updateInventory(item.product?._id || '', val, item.lowStockThreshold);
+                        }
                       }}
                       disabled={!item.product}
                     >
@@ -126,8 +130,12 @@ const Inventory: React.FC = () => {
                       className="btn-secondary" 
                       style={{ padding: '6px 12px' }}
                       onClick={() => {
-                        const newThreshold = prompt('Enter new alert threshold:', item.lowStockThreshold.toString());
-                        if (newThreshold !== null) updateInventory(item.product?._id || '', item.stockLevel, parseInt(newThreshold));
+                        const input = prompt('Enter new alert threshold:', item.lowStockThreshold.toString());
+                        if (input !== null) {
+                           const val = parseInt(input);
+                           if (isNaN(val) || val < 0) return alert('Please enter a valid non-negative number');
+                           updateInventory(item.product?._id || '', item.stockLevel, val);
+                        }
                       }}
                       disabled={!item.product}
                     >

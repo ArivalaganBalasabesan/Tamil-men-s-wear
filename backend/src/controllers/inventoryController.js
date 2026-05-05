@@ -39,6 +39,15 @@ exports.getLowStockAlerts = async (req, res) => {
 exports.updateStock = async (req, res) => {
   try {
     const { product, stockLevel, lowStockThreshold } = req.body;
+    
+    // Validation
+    if (stockLevel !== undefined && (isNaN(stockLevel) || stockLevel < 0)) {
+       return res.status(400).json({ message: 'Stock level must be a non-negative number' });
+    }
+    if (lowStockThreshold !== undefined && (isNaN(lowStockThreshold) || lowStockThreshold < 0)) {
+       return res.status(400).json({ message: 'Threshold must be a non-negative number' });
+    }
+
     let item = await Inventory.findOne({ product });
     
     if (item) {
