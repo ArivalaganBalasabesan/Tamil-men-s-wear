@@ -2,11 +2,41 @@ const LoyaltyTransaction = require('../models/LoyaltyTransaction');
 const User = require('../models/User');
 const Loyalty = require('../models/Loyalty');
 
+// Admin only: Get all users merged with their loyalty data
+exports.getAllLoyalty = async (req, res) => {
+  try {
+    // 1. Fetch ALL users from DB
+    const users = await User.find({}).select('name email role').lean();
+    
+    // 2. Fetch ALL loyalty records
+    const loyalties = await Loyalty.find({}).lean();
+
+    // 3. Merge them manually to ensure 100% visibility
+    const merged = users.map(u => {
+      const l = loyalties.find(loy => loy.user && loy.user.toString() === u._id.toString());
+      return {
+        user: {
+          _id: u._id,
+          name: u.name,
+          email: u.email,
+          role: u.role
+        },
+        points: l ? l.points : 0,
+        tier: l ? l.tier : 'Bronze'
+      };
+    });
+
+    res.json(merged);
+  } catch (error) {
+    console.error('Loyalty Fetch Error:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
 exports.getLoyaltyInfo = async (req, res) => {
   try {
     let loyalty = await Loyalty.findOne({ user: req.user.id }).populate('history');
     if (!loyalty) {
-      // Lazy initialize
       loyalty = new Loyalty({ user: req.user.id });
       await loyalty.save();
     }
@@ -17,32 +47,6 @@ exports.getLoyaltyInfo = async (req, res) => {
       userTier: loyalty.tier,
       transactions
     });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Admin only: Get all users merged with their loyalty data
-exports.getAllLoyalty = async (req, res) => {
-  try {
-    // Fetch ALL users to ensure the list is not empty
-    const users = await User.find().select('name email role');
-    const loyalties = await Loyalty.find();
-
-    const merged = users.map(user => {
-      const loyalty = loyalties.find(l => l.user && l.user.toString() === user._id.toString());
-      return {
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email
-        },
-        points: loyalty ? loyalty.points : 0,
-        tier: loyalty ? loyalty.tier : 'Bronze'
-      };
-    });
-
-    res.json(merged);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -77,16 +81,14 @@ exports.adminAdjustPoints = async (req, res) => {
   try {
     const { userId, points, type, description } = req.body;
     
-    // Create transaction
     const transaction = new LoyaltyTransaction({
       user: userId,
-      points,
-      type, // 'Earned' or 'Redeemed'
+      points: parseInt(points),
+      type,
       description: `[Admin Adjustment] ${description}`
     });
     await transaction.save();
 
-    // Update Loyalty collection
     const inc = type === 'Earned' ? parseInt(points) : -parseInt(points);
     const loyalty = await Loyalty.findOneAndUpdate(
       { user: userId },

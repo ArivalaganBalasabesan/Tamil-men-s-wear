@@ -44,6 +44,10 @@ const Loyalty: React.FC = () => {
       });
       
       setLoading(false);
+      // Success indicator
+      if (mappedUsers.length > 0) {
+        console.log(`Successfully synced ${mappedUsers.length} users.`);
+      }
     } catch (err) {
       console.error('Error fetching loyalty data:', err);
       setLoading(false);
