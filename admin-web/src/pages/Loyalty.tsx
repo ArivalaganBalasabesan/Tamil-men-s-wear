@@ -65,8 +65,9 @@ const Loyalty: React.FC = () => {
         alert(`Successfully ${type === 'Earned' ? 'added' : 'deducted'} ${pointsVal} points.`);
       } catch (err: any) {
         console.error('Error updating points:', err);
+        const status = err.response?.status;
         const msg = err.response?.data?.message || 'Failed to update points. Please ensure the backend is fully deployed.';
-        alert(msg);
+        alert(`Error ${status || 'Network'}: ${msg}`);
       }
     }
   };
