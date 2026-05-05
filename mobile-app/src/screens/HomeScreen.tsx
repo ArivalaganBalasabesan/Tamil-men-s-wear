@@ -135,10 +135,10 @@ const HomeScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
-        {/* Featured Products */}
+        {/* Featured Products (Grid) */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Trending Now</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text, paddingHorizontal: 0 }]}>Trending Now</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Search' })}>
               <Text style={{ color: theme.primary, fontWeight: '600' }}>See All</Text>
             </TouchableOpacity>
@@ -148,14 +148,29 @@ const HomeScreen = ({ navigation }) => {
           ) : filteredProducts.length === 0 ? (
             <Text style={{ color: theme.textMuted, paddingHorizontal: 24 }}>No products found in this category.</Text>
           ) : (
-            <FlatList
-              data={filteredProducts.slice(0, 6)}
-              renderItem={renderProduct}
-              keyExtractor={item => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productScroll}
-            />
+            <View style={styles.grid}>
+              {filteredProducts.slice(0, 4).map(product => (
+                <TouchableOpacity 
+                  key={product._id}
+                  style={[styles.gridCard, { backgroundColor: theme.card }]}
+                  onPress={() => navigation.navigate('ProductDetails', { product })}
+                >
+                  <View>
+                    <Image source={{ uri: product.images?.[0] || 'https://via.placeholder.com/150' }} style={styles.gridImage} />
+                    <View style={[
+                      styles.stockBadgeGrid, 
+                      { backgroundColor: (product.stock > 0) ? '#22C55E' : '#EF4444' }
+                    ]}>
+                      <Text style={styles.stockTextGrid}>{(product.stock > 0) ? 'IN STOCK' : 'OUT OF STOCK'}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.gridInfo}>
+                    <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={1}>{product.name}</Text>
+                    <Text style={[styles.gridPrice, { color: theme.primary }]}>LKR {(product.price || 0).toLocaleString()}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
           )}
         </View>
 
@@ -163,7 +178,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={[styles.section, { marginBottom: 120 }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Just For You</Text>
           <View style={styles.grid}>
-             {filteredProducts.slice(0, 4).map(product => (
+             {filteredProducts.slice(4, 8).map(product => (
                 <TouchableOpacity 
                    key={product._id}
                    style={[styles.gridCard, { backgroundColor: theme.card }]}
@@ -178,8 +193,10 @@ const HomeScreen = ({ navigation }) => {
                        <Text style={styles.stockTextGrid}>{(product.stock > 0) ? 'IN STOCK' : 'OUT OF STOCK'}</Text>
                      </View>
                    </View>
-                   <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={1}>{product.name}</Text>
-                   <Text style={[styles.gridPrice, { color: theme.primary }]}>LKR {product.price || 0}</Text>
+                   <View style={styles.gridInfo}>
+                     <Text style={[styles.gridName, { color: theme.text }]} numberOfLines={1}>{product.name}</Text>
+                     <Text style={[styles.gridPrice, { color: theme.primary }]}>LKR {(product.price || 0).toLocaleString()}</Text>
+                   </View>
                 </TouchableOpacity>
              ))}
           </View>
@@ -223,11 +240,12 @@ const styles = StyleSheet.create({
   productInfo: { padding: 12 },
   productName: { fontSize: 14, fontWeight: '600' },
   productPrice: { fontSize: 15, fontWeight: '800', marginTop: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 24, gap: 16, marginTop: 16 },
-  gridCard: { width: (width - 64) / 2, borderRadius: 20, padding: 10 },
-  gridImage: { width: '100%', height: 150, borderRadius: 12, marginBottom: 10 },
-  gridName: { fontSize: 13, fontWeight: '600' },
-  gridPrice: { fontSize: 14, fontWeight: '800', marginTop: 4 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 24, justifyContent: 'space-between' },
+  gridCard: { width: (width - 64) / 2, borderRadius: 20, marginBottom: 20, overflow: 'hidden' },
+  gridImage: { width: '100%', height: 220, resizeMode: 'cover' },
+  gridInfo: { padding: 12 },
+  gridName: { fontSize: 14, fontWeight: '700' },
+  gridPrice: { fontSize: 15, fontWeight: '800', marginTop: 4 },
   stockBadge: { position: 'absolute', top: 10, left: 10, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, zIndex: 5 },
   stockText: { color: '#FFF', fontSize: 9, fontWeight: '800' },
   stockBadgeGrid: { position: 'absolute', top: 5, left: 5, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4, zIndex: 5 },
