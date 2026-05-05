@@ -73,6 +73,10 @@ const Inventory: React.FC = () => {
       <div className="data-table-card">
         {loading ? (
           <div className="loading-state">Loading inventory...</div>
+        ) : filteredInventory.length === 0 ? (
+          <div className="empty-state" style={{ padding: '40px', textAlign: 'center', color: '#888' }}>
+            No products found in inventory. Make sure you have products added.
+          </div>
         ) : (
           <table>
             <thead>
@@ -87,7 +91,7 @@ const Inventory: React.FC = () => {
             <tbody>
               {filteredInventory.map(item => (
                 <tr key={item._id}>
-                  <td className="font-bold">{item.product?.name}</td>
+                  <td className="font-bold">{item.product?.name || 'Unknown Product'}</td>
                   <td>{item.stockLevel}</td>
                   <td>{item.lowStockThreshold}</td>
                   <td>
@@ -101,8 +105,9 @@ const Inventory: React.FC = () => {
                       style={{ padding: '6px 12px', marginRight: '8px' }}
                       onClick={() => {
                         const newStock = prompt('Enter new stock quantity:', item.stockLevel.toString());
-                        if (newStock !== null) updateInventory(item.product._id, parseInt(newStock), item.lowStockThreshold);
+                        if (newStock !== null) updateInventory(item.product?._id || '', parseInt(newStock), item.lowStockThreshold);
                       }}
+                      disabled={!item.product}
                     >
                       <ArrowUpCircle size={14} />
                       <span>Update Stock</span>
@@ -112,8 +117,9 @@ const Inventory: React.FC = () => {
                       style={{ padding: '6px 12px' }}
                       onClick={() => {
                         const newThreshold = prompt('Enter new alert threshold:', item.lowStockThreshold.toString());
-                        if (newThreshold !== null) updateInventory(item.product._id, item.stockLevel, parseInt(newThreshold));
+                        if (newThreshold !== null) updateInventory(item.product?._id || '', item.stockLevel, parseInt(newThreshold));
                       }}
+                      disabled={!item.product}
                     >
                       <span>Set Threshold</span>
                     </button>

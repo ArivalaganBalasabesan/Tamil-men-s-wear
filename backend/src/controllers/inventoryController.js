@@ -22,6 +22,21 @@ exports.getInventory = async (req, res) => {
     }
 
     const inventory = await Inventory.find().populate('product');
+    
+    // If empty after sync, it might be because the loop failed or no products exist
+    if (inventory.length === 0 && products.length > 0) {
+       console.log('Syncing inventory on first access...');
+       for (const prod of products) {
+         await Inventory.findOneAndUpdate(
+           { product: prod._id },
+           { stockLevel: prod.stock || 0, lowStockThreshold: 5 },
+           { upsert: true }
+         );
+       }
+       const synced = await Inventory.find().populate('product');
+       return res.json(synced);
+    }
+
     res.json(inventory);
   } catch (error) {
     res.status(500).json({ message: error.message });
