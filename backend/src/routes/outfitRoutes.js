@@ -3,6 +3,7 @@ const router = express.Router();
 const outfitController = require('../controllers/outfitController');
 const { protect } = require('../middleware/auth');
 
+router.get('/smart-suggestions', protect, outfitController.getSmartSuggestions);
 router.get('/my', protect, outfitController.getMyOutfits);
 router.get('/public', outfitController.getPublicOutfits);
 router.post('/', protect, outfitController.createOutfit);

@@ -40,3 +40,27 @@ exports.deleteOutfit = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.getSmartSuggestions = async (req, res) => {
+  try {
+    const { category } = req.query; // e.g., 'Office', 'Casual'
+    const Product = require('../models/Product');
+    
+    // Find products in categories that match
+    const tops = await Product.find({ category, name: { $regex: /shirt|tshirt|top/i } }).limit(2);
+    const bottoms = await Product.find({ category, name: { $regex: /pant|trouser|jean/i } }).limit(2);
+    const shoes = await Product.find({ category, name: { $regex: /shoe|boot/i } }).limit(2);
+
+    const suggestions = [];
+    if (tops[0] && bottoms[0]) {
+      suggestions.push({
+        name: `${category} Standard Set`,
+        products: [tops[0]._id, bottoms[0]._id, shoes[0]?._id].filter(Boolean),
+        description: `A perfectly matched ${category} outfit.`
+      });
+    }
+
+    res.json(suggestions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

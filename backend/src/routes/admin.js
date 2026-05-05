@@ -24,19 +24,28 @@ router.get('/stats', protect, adminAuth, async (req, res) => {
     const categorySales = {};
 
     orders.forEach(o => {
-      if (o.paymentStatus === 'Completed') {
+      if (o.paymentStatus === 'Completed' || o.orderStatus !== 'Cancelled') {
         totalRevenue += o.totalAmount;
         
-        // Monthly trend
-        const month = new Date(o.createdAt).toLocaleString('default', { month: 'short' });
+        const date = new Date(o.createdAt);
+        const month = date.toLocaleString('default', { month: 'short' });
         monthlySales[month] = (monthlySales[month] || 0) + o.totalAmount;
 
-        // Category breakdown (assuming products are populated or we calculate from items)
-        o.products.forEach(p => {
-          // This is a bit simplified, ideally we find the product's category
+        o.products.forEach(item => {
+           // We can track top products here if we populate
         });
       }
     });
+
+    // Top Products Calculation
+    const topProducts = await Order.aggregate([
+      { $unwind: "$products" },
+      { $group: { _id: "$products.productId", totalSold: { $sum: "$products.quantity" } } },
+      { $sort: { totalSold: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "productDetails" } },
+      { $unwind: "$productDetails" }
+    ]);
 
     const usersCount = await User.countDocuments({ role: 'user' });
     const lowStockCount = await Product.countDocuments({ stock: { $lt: 5 } });
@@ -47,6 +56,7 @@ router.get('/stats', protect, adminAuth, async (req, res) => {
       usersCount,
       lowStockCount,
       monthlySales,
+      topProducts,
       categoryDistribution: products.reduce((acc, p) => {
         acc[p.category] = (acc[p.category] || 0) + 1;
         return acc;
