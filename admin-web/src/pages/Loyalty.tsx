@@ -85,6 +85,23 @@ const Loyalty: React.FC = () => {
     fetchData();
   }, []);
 
+  const handleMigrate = async () => {
+    console.log('Migration button clicked');
+    if (!window.confirm('Import legacy points from User collection? This will update existing loyalty records.')) return;
+    
+    try {
+      setLoading(true);
+      const res = await axios.post('loyalty/migrate', {}, getTokenConfig());
+      alert(res.data.message);
+      await fetchData();
+    } catch (err: any) {
+      console.error('Migration Error:', err);
+      alert('Migration failed: ' + (err.response?.data?.message || 'Check backend deployment'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -104,17 +121,8 @@ const Loyalty: React.FC = () => {
           </button>
           <button 
             className="add-btn" 
-            onClick={async () => {
-              if (window.confirm('Import legacy points from User collection? This will update existing loyalty records.')) {
-                try {
-                  const res = await axios.post('loyalty/migrate', {}, getTokenConfig());
-                  alert(res.data.message);
-                  fetchData();
-                } catch (err) {
-                  alert('Migration failed. Ensure backend is updated.');
-                }
-              }
-            }} 
+            onClick={handleMigrate} 
+            disabled={loading}
             style={{ background: '#f59e0b' }}
           >
             <TrendingUp size={20} />
