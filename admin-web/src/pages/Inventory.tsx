@@ -52,9 +52,10 @@ const Inventory: React.FC = () => {
     }
   };
 
-  const filteredInventory = inventory.filter(item => 
-    item.product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInventory = inventory.filter(item => {
+    const productName = item.product?.name || 'Unknown Product';
+    return productName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="page-container">
@@ -68,6 +69,9 @@ const Inventory: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <button className="btn-secondary" onClick={() => { setLoading(true); fetchInventory(); }}>
+           Refresh & Sync
+        </button>
       </div>
 
       <div className="data-table-card">
@@ -91,7 +95,13 @@ const Inventory: React.FC = () => {
             <tbody>
               {filteredInventory.map(item => (
                 <tr key={item._id}>
-                  <td className="font-bold">{item.product?.name || 'Unknown Product'}</td>
+                  <td className="font-bold">
+                    {item.product?.name || (
+                      <span style={{ color: '#EF4444', fontSize: '12px' }}>
+                        ⚠️ Broken Ref (ID: {item._id.slice(-4)})
+                      </span>
+                    )}
+                  </td>
                   <td>{item.stockLevel}</td>
                   <td>{item.lowStockThreshold}</td>
                   <td>
