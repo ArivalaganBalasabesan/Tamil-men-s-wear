@@ -25,11 +25,12 @@ exports.getLoyaltyInfo = async (req, res) => {
 // Admin only: Get all users merged with their loyalty data
 exports.getAllLoyalty = async (req, res) => {
   try {
-    const users = await User.find({ role: { $ne: 'admin' } }).select('name email');
+    // Fetch ALL users to ensure the list is not empty
+    const users = await User.find().select('name email role');
     const loyalties = await Loyalty.find();
 
     const merged = users.map(user => {
-      const loyalty = loyalties.find(l => l.user.toString() === user._id.toString());
+      const loyalty = loyalties.find(l => l.user && l.user.toString() === user._id.toString());
       return {
         user: {
           _id: user._id,
