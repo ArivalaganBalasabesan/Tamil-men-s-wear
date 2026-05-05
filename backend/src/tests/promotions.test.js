@@ -2,27 +2,31 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const express = require('express');
 const Promotion = require('../models/Promotion');
+
+// Mock auth middleware BEFORE requiring routes
+jest.mock('../middleware/auth', () => ({
+  protect: (req, res, next) => {
+    req.user = { id: '60d21b4667d0d8992e610c85', role: 'admin' };
+    next();
+  },
+  admin: (req, res, next) => next()
+}));
+
 const promoRoutes = require('../routes/promotionRoutes');
-const { connectDB, closeDB } = require('./setup'); // Assuming a setup file exists
+const { connectDB, closeDB } = require('./setup');
 
 const app = express();
 app.use(express.json());
-// Mock middleware
-app.use('/api/promotions', (req, res, next) => {
-  req.user = { id: '60d21b4667d0d8992e610c85', role: 'admin' };
-  next();
-}, promoRoutes);
+app.use('/api/promotions', promoRoutes);
 
 describe('Promotion API', () => {
   beforeAll(async () => {
-    // Setup test DB connection
-    process.env.JWT_SECRET = 'testsecret';
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/tamil_test');
+    await connectDB();
   });
 
   afterAll(async () => {
     await Promotion.deleteMany({});
-    await mongoose.connection.close();
+    await closeDB();
   });
 
   test('Should create a new promotion', async () => {

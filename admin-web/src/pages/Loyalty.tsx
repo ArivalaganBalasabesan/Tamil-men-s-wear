@@ -55,7 +55,7 @@ const Loyalty: React.FC = () => {
       const type = parseInt(newPoints) >= 0 ? 'Earned' : 'Redeemed';
 
       try {
-        await axios.post('/loyalty/adjust', { 
+        await axios.post('loyalty/adjust', { 
           userId: id, 
           points: pointsVal, 
           type, 

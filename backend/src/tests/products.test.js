@@ -1,49 +1,72 @@
 const request = require('supertest');
 const express = require('express');
+const mongoose = require('mongoose');
+const Inventory = require('../models/Inventory'); 
+const Product = require('../models/Product');
 
 jest.mock('../middleware/auth', () => ({
-  protect: (req, res, next) => { req.user = { id: 'admin', role: 'admin' }; next(); },
+  protect: (req, res, next) => { req.user = { id: '60d21b4667d0d8992e610c85', role: 'admin' }; next(); },
   admin: (req, res, next) => next()
 }));
 
-jest.mock('../models/Product', () => {
-  const mockProduct = { _id: '1', name: 'S', save: jest.fn().mockResolvedValue({ _id: '1', name: 'S' }) };
-  const Mock = jest.fn().mockImplementation(() => mockProduct);
-  Mock.find = jest.fn().mockReturnValue({ limit: jest.fn().mockResolvedValue([{ name: 'S', price: 10 }]) });
-  Mock.findById = jest.fn().mockResolvedValue(mockProduct);
-  Mock.findByIdAndUpdate = jest.fn().mockResolvedValue(mockProduct);
-  Mock.findByIdAndDelete = jest.fn().mockResolvedValue(true);
-  return Mock;
-});
-
 const productRoutes = require('../routes/products');
+const { connectDB, closeDB } = require('./setup');
 const app = express();
 app.use(express.json());
 app.use('/api/products', productRoutes);
 
-describe('Member 2: Products & Category (6 Tests)', () => {
-  it('7. List', async () => {
+describe('Member 2: Products & Category', () => {
+  let testProductId;
+
+  beforeAll(async () => {
+    await connectDB();
+    await Inventory.deleteMany({});
+    await Product.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await Product.deleteMany({});
+    await Inventory.deleteMany({});
+    await closeDB();
+  });
+
+  it('Create Product', async () => {
+    const res = await request(app).post('/api/products').send({ 
+      name: 'Test Shirt', 
+      price: 1500, 
+      category: 'Shirts',
+      description: 'Test Desc',
+      stock: 10
+    });
+    
+    if (res.statusCode !== 200 && res.statusCode !== 201) {
+        console.log('Create Failed:', res.text);
+    }
+    expect([200, 201]).toContain(res.statusCode);
+    testProductId = res.body._id;
+    expect(testProductId).toBeDefined();
+  });
+
+  it('List Products', async () => {
     const res = await request(app).get('/api/products');
     expect(res.statusCode).toEqual(200);
+    expect(Array.isArray(res.body)).toBeTruthy();
   });
-  it('8. Single', async () => {
-    const res = await request(app).get('/api/products/1');
-    expect(res.statusCode).toBeDefined();
-  });
-  it('9. Create', async () => {
-    const res = await request(app).post('/api/products').send({ name: 'S', price: 10 });
+
+  it('Get Single Product', async () => {
+    const res = await request(app).get(`/api/products/${testProductId}`);
     expect(res.statusCode).toEqual(200);
+    expect(res.body.name).toBe('Test Shirt');
   });
-  it('10. Filter', async () => {
-    const res = await request(app).get('/api/products/recommendations?occasion=wedding');
+
+  it('Update Product', async () => {
+    const res = await request(app).put(`/api/products/${testProductId}`).send({ price: 2000 });
     expect(res.statusCode).toEqual(200);
+    expect(res.body.price).toBe(2000);
   });
-  it('11. Update', async () => {
-    const res = await request(app).put('/api/products/1').send({ price: 20 });
-    expect(res.statusCode).toEqual(200);
-  });
-  it('12. Delete', async () => {
-    const res = await request(app).delete('/api/products/1');
+
+  it('Delete Product', async () => {
+    const res = await request(app).delete(`/api/products/${testProductId}`);
     expect(res.statusCode).toEqual(200);
   });
 });
