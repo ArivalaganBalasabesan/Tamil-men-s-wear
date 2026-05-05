@@ -86,6 +86,13 @@ export default function ProfileScreen({ navigation }) {
                 index: 0,
                 routes: [{ name: 'Login' }],
               });
+
+              // 4. Web Fallback: Force browser refresh to Login
+              if (typeof window !== 'undefined') {
+                setTimeout(() => {
+                  window.location.href = '/';
+                }, 500);
+              }
             } catch (err) {
               console.error('Logout error:', err);
               // Fallback: still dispatch logout

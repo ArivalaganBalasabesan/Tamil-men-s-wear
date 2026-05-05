@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   productPrice: { fontSize: 15, fontWeight: '800', marginTop: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 24, justifyContent: 'space-between' },
   gridCard: { width: (width - 64) / 2, borderRadius: 20, marginBottom: 20, overflow: 'hidden' },
-  gridImage: { width: '100%', height: 220, resizeMode: 'cover' },
+  gridImage: { width: '100%', height: 220, resizeMode: 'contain', backgroundColor: '#F3F4F6' },
   gridInfo: { padding: 12 },
   gridName: { fontSize: 14, fontWeight: '700' },
   gridPrice: { fontSize: 15, fontWeight: '800', marginTop: 4 },
