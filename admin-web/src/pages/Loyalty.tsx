@@ -97,10 +97,30 @@ const Loyalty: React.FC = () => {
             <p>Monitor customer reward points and engagement levels</p>
           </div>
         </div>
-        <button className="add-btn" onClick={fetchData} disabled={loading}>
-          <RefreshCw size={20} className={loading ? 'spin' : ''} />
-          <span>{loading ? 'Syncing...' : 'Sync Data'}</span>
-        </button>
+        <div className="header-right" style={{ display: 'flex', gap: '10px' }}>
+          <button className="add-btn" onClick={fetchData} disabled={loading} style={{ background: '#6366f1' }}>
+            <RefreshCw size={20} className={loading ? 'spin' : ''} />
+            <span>{loading ? 'Syncing...' : 'Sync Data'}</span>
+          </button>
+          <button 
+            className="add-btn" 
+            onClick={async () => {
+              if (window.confirm('Import legacy points from User collection? This will update existing loyalty records.')) {
+                try {
+                  const res = await axios.post('loyalty/migrate', {}, getTokenConfig());
+                  alert(res.data.message);
+                  fetchData();
+                } catch (err) {
+                  alert('Migration failed. Ensure backend is updated.');
+                }
+              }
+            }} 
+            style={{ background: '#f59e0b' }}
+          >
+            <TrendingUp size={20} />
+            <span>Import Legacy Data</span>
+          </button>
+        </div>
       </div>
 
       <div className="stats-grid">

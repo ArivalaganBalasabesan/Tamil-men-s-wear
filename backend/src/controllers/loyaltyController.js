@@ -101,3 +101,26 @@ exports.adminAdjustPoints = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.migrateData = async (req, res) => {
+  try {
+    const usersWithPoints = await User.find({ loyaltyPoints: { $gt: 0 } });
+    let migratedCount = 0;
+
+    for (const user of usersWithPoints) {
+      await Loyalty.findOneAndUpdate(
+        { user: user._id },
+        { 
+          $set: { points: user.loyaltyPoints },
+          $setOnInsert: { tier: 'Bronze' } 
+        },
+        { upsert: true }
+      );
+      migratedCount++;
+    }
+
+    res.json({ message: `Successfully migrated ${migratedCount} users from legacy collection.` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
