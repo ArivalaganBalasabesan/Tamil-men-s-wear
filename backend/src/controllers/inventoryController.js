@@ -5,6 +5,15 @@ exports.getInventory = async (req, res) => {
     const Product = require('../models/Product');
     const products = await Product.find();
     
+    // Clean up broken references (inventory records with no existing product)
+    const allInventory = await Inventory.find();
+    for (const item of allInventory) {
+       const p = await Product.findById(item.product);
+       if (!p) {
+          await Inventory.findByIdAndDelete(item._id);
+       }
+    }
+
     // Bulk sync: create missing inventory records for all products
     const existingProductIds = await Inventory.find().distinct('product');
     const missingProducts = products.filter(p => !existingProductIds.map(id => id.toString()).includes(p._id.toString()));
