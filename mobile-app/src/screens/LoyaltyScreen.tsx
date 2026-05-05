@@ -33,10 +33,14 @@ export default function LoyaltyScreen({ navigation }) {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/auth/me`);
-      setProfile(res.data);
+      const res = await api.get(`/loyalty`);
+      // Adapt the new loyalty response to the profile state
+      setProfile({
+        loyaltyPoints: res.data.totalPoints,
+        loyaltyTier: res.data.userTier
+      });
     } catch (e) {
-      setProfile(user);
+      console.error('Error fetching loyalty:', e);
     } finally { setLoading(false); }
   };
 
