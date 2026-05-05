@@ -9,7 +9,6 @@ interface User {
   email: string;
   role: string;
   isActive: boolean;
-  loyaltyPoints?: number;
 }
 
 const Users: React.FC = () => {
@@ -62,32 +61,6 @@ const Users: React.FC = () => {
     }
   };
 
-  const updatePoints = async (id: string) => {
-    const newPoints = prompt('Enter points to add/deduct:', '0');
-    if (newPoints !== null && !isNaN(parseInt(newPoints))) {
-      const reason = prompt('Enter reason for adjustment:', 'Admin adjustment');
-      if (reason === null) return;
-
-      const pointsVal = Math.abs(parseInt(newPoints));
-      const type = parseInt(newPoints) >= 0 ? 'Earned' : 'Redeemed';
-
-      try {
-        await axios.post('loyalty/adjust', { 
-          userId: id, 
-          points: pointsVal, 
-          type, 
-          description: reason 
-        }, { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } });
-        fetchUsers();
-        alert('Points updated successfully');
-      } catch (err: any) {
-        alert(`Error: ${err.response?.data?.message || 'Failed to update points'}`);
-      }
-    }
-  };
-
-
-
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -117,7 +90,6 @@ const Users: React.FC = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Loyalty Points</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -129,11 +101,6 @@ const Users: React.FC = () => {
                   <td>
                     <span className={`badge ${user.role === 'admin' ? 'processing' : 'active'}`}>
                       {user.role.toUpperCase()}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="points-badge" onClick={() => updatePoints(user._id)} style={{ cursor: 'pointer' }}>
-                      {user.loyaltyPoints || 0} PTS
                     </span>
                   </td>
                   <td className="actions-cell">

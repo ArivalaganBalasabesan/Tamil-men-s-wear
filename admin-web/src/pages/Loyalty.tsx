@@ -26,15 +26,19 @@ const Loyalty: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/users', getTokenConfig());
-      // Filter only customers (no admins)
-      const loyaltyUsers = res.data.filter((u: any) => u.role !== 'admin');
-      setUsers(loyaltyUsers);
+      const res = await axios.get('loyalty/all', getTokenConfig());
+      const mappedUsers = res.data.map((l: any) => ({
+        _id: l.user?._id || 'deleted',
+        name: l.user?.name || 'Unknown User',
+        email: l.user?.email || 'N/A',
+        loyaltyPoints: l.points || 0
+      }));
+      setUsers(mappedUsers);
       
-      const total = loyaltyUsers.reduce((acc: number, curr: any) => acc + (curr.loyaltyPoints || 0), 0);
+      const total = mappedUsers.reduce((acc: number, curr: any) => acc + curr.loyaltyPoints, 0);
       setStats({
         totalPoints: total,
-        activeMembers: loyaltyUsers.length,
+        activeMembers: mappedUsers.length,
         pointValue: '1 Point = LKR 1'
       });
       
