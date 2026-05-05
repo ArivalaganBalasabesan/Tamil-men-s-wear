@@ -22,10 +22,26 @@ exports.getLoyaltyInfo = async (req, res) => {
   }
 };
 
+// Admin only: Get all users merged with their loyalty data
 exports.getAllLoyalty = async (req, res) => {
   try {
-    const loyalties = await Loyalty.find().populate('user', 'name email');
-    res.json(loyalties);
+    const users = await User.find({ role: { $ne: 'admin' } }).select('name email');
+    const loyalties = await Loyalty.find();
+
+    const merged = users.map(user => {
+      const loyalty = loyalties.find(l => l.user.toString() === user._id.toString());
+      return {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email
+        },
+        points: loyalty ? loyalty.points : 0,
+        tier: loyalty ? loyalty.tier : 'Bronze'
+      };
+    });
+
+    res.json(merged);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
