@@ -25,6 +25,7 @@ const Loyalty: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      console.log('Fetching loyalty data from: loyalty/all');
       setLoading(true);
       const res = await axios.get('loyalty/all', getTokenConfig());
       const mappedUsers = res.data.map((l: any) => ({
@@ -164,6 +165,9 @@ const Loyalty: React.FC = () => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div style={{ marginTop: '20px', fontSize: '12px', opacity: 0.5, textAlign: 'center' }}>
+        v1.0.9 - Integrated Discovery Mode
       </div>
     </div>
   );
