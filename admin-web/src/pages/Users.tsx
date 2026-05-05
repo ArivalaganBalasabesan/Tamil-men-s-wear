@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Shield, UserMinus, Trash2, UserCheck, ShieldCheck } from 'lucide-react';
+import { Search, Shield, Trash2, UserCheck, ShieldCheck } from 'lucide-react';
 import axios from '../axios';
 import './Pages.css';
 

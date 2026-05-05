@@ -15,12 +15,12 @@ interface DashboardStats {
   totalOrders: number;
   usersCount: number;
   lowStockCount: number;
+  categoryDistribution?: Record<string, number>;
 }
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
-  const [topProducts, setTopProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,6 @@ const Dashboard: React.FC = () => {
 
       setStats(statsRes.data);
       setRecentOrders(ordersRes.data.slice(0, 5));
-      setTopProducts(productsRes.data.slice(0, 3));
     } catch (err) {
       console.error('Error fetching dashboard data', err);
     } finally {
