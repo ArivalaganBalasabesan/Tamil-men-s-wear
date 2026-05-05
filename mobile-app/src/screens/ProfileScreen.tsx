@@ -81,8 +81,11 @@ export default function ProfileScreen({ navigation }) {
               // 2. Reset Redux State
               dispatch(logout());
               
-              // 3. Optional: Reset API headers if needed
-              // api.defaults.headers.common['Authorization'] = '';
+              // 3. Force Navigate to Login (Absolute Redirection)
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
             } catch (err) {
               console.error('Logout error:', err);
               // Fallback: still dispatch logout
