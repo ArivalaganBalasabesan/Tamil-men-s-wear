@@ -32,10 +32,9 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem('adminToken');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      const [statsRes, ordersRes, productsRes] = await Promise.all([
+      const [statsRes, ordersRes] = await Promise.all([
         axios.get('/admin/stats', config),
-        axios.get('/orders', config),
-        axios.get('/products', config)
+        axios.get('/orders', config)
       ]);
 
       setStats(statsRes.data);
