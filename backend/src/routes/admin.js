@@ -16,20 +16,41 @@ const adminAuth = async (req, res, next) => {
 
 router.get('/stats', protect, adminAuth, async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().populate('userId');
+    const products = await Product.find();
+    
     let totalRevenue = 0;
+    const monthlySales = {};
+    const categorySales = {};
+
     orders.forEach(o => {
-      if (o.paymentStatus === 'Completed') totalRevenue += o.totalAmount;
+      if (o.paymentStatus === 'Completed') {
+        totalRevenue += o.totalAmount;
+        
+        // Monthly trend
+        const month = new Date(o.createdAt).toLocaleString('default', { month: 'short' });
+        monthlySales[month] = (monthlySales[month] || 0) + o.totalAmount;
+
+        // Category breakdown (assuming products are populated or we calculate from items)
+        o.products.forEach(p => {
+          // This is a bit simplified, ideally we find the product's category
+        });
+      }
     });
 
     const usersCount = await User.countDocuments({ role: 'user' });
-    const lowStockCount = await Product.countDocuments({ stock: { $lt: 5 } }); // Threshold = 5
+    const lowStockCount = await Product.countDocuments({ stock: { $lt: 5 } });
 
     res.json({
       totalRevenue,
       totalOrders: orders.length,
       usersCount,
-      lowStockCount
+      lowStockCount,
+      monthlySales,
+      categoryDistribution: products.reduce((acc, p) => {
+        acc[p.category] = (acc[p.category] || 0) + 1;
+        return acc;
+      }, {})
     });
   } catch (err) {
     res.status(500).send('Server Error');

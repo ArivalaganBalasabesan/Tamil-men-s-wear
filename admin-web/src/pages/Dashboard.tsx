@@ -142,24 +142,21 @@ const Dashboard: React.FC = () => {
           </table>
         </div>
 
-        <div className="content-card top-products">
+        <div className="content-card analytics-summary">
           <div className="card-header">
-            <h3>Popular Products</h3>
+            <h3>Category Distribution</h3>
           </div>
-          <div className="product-list">
-            {topProducts.map(product => (
-              <div key={product._id} className="product-item">
-                <div className="product-img">
-                   {product.images[0] ? <img src={product.images[0]} alt="" /> : <div className="placeholder"></div>}
+          <div className="category-stats">
+            {stats?.categoryDistribution && Object.entries(stats.categoryDistribution).map(([cat, count]: any) => (
+              <div key={cat} className="cat-stat-row">
+                <span className="cat-name">{cat}</span>
+                <div className="cat-bar-bg">
+                  <div 
+                    className="cat-bar-fill" 
+                    style={{ width: `${(count / stats.totalOrders) * 100}%`, backgroundColor: 'var(--primary)' }}
+                  ></div>
                 </div>
-                <div className="product-details">
-                  <h4>{product.name}</h4>
-                  <p>{product.category}</p>
-                </div>
-                <div className="product-meta">
-                  <span className="price">LKR {product.price}</span>
-                  <span className="sales">{product.stock} in stock</span>
-                </div>
+                <span className="cat-count">{count}</span>
               </div>
             ))}
           </div>

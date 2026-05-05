@@ -28,7 +28,7 @@ export default function ProductDetailsScreen({ route, navigation }) {
 
   const fetchReviews = async () => {
     try {
-      const res = await api.get(`/reviews/${product._id}`);
+      const res = await api.get(`/reviews/product/${product._id}`);
       setReviews(res.data);
     } catch(err) {
       console.log('Error fetching reviews', err);

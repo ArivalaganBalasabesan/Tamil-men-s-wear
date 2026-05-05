@@ -16,7 +16,7 @@ router.post('/', protect, async (req, res) => {
 });
 
 // Get Reviews for Product
-router.get('/:productId', async (req, res) => {
+router.get('/product/:productId', async (req, res) => {
   try {
     const reviews = await Review.find({ productId: req.params.productId }).populate('userId', 'name');
     res.json(reviews);
