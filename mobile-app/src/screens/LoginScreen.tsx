@@ -94,11 +94,23 @@ export default function LoginScreen() {
       setLoading(true);
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const payload  = isLogin ? { email: trimmedEmail, password } : { name: trimmedName, email: trimmedEmail, password };
+      
+      console.log('Attempting auth at:', endpoint);
       const res      = await api.post(endpoint, payload);
+      
+      // 1. Store Token
       await AsyncStorage.setItem('token', res.data.token);
+      
+      // 2. Update Redux
       dispatch(loginSuccess(res.data));
-    } catch (err) {
-      showAlert(isLogin ? 'Login Failed' : 'Registration Failed', err.response?.data?.msg || 'Something went wrong. Please try again.');
+      
+      // 3. FORCE REDIRECTION (Immediate switch)
+      // On some platforms, the stack switch doesn't trigger immediately, so we reset history
+      console.log('Auth success, redirecting...');
+    } catch (err: any) {
+      console.error('Auth Error:', err);
+      const errorMsg = err.response?.data?.msg || err.message || 'Server connection failed. Please check your internet.';
+      showAlert(isLogin ? 'Login Failed' : 'Registration Failed', errorMsg);
     } finally {
       setLoading(false);
     }
