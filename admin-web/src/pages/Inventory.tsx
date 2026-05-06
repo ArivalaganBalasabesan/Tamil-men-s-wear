@@ -32,8 +32,9 @@ const Inventory: React.FC = () => {
     try {
       const res = await axios.get('/inventory', getTokenConfig());
       setInventory(res.data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching inventory', err);
+      alert('Failed to load inventory: ' + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
