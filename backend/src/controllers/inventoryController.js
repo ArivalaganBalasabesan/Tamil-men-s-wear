@@ -11,21 +11,17 @@ exports.getInventory = async (req, res) => {
     
     const missingProducts = products.filter(p => !existingProductIdsStr.includes(p._id.toString()));
 
-    if (missingProducts.length > 0) {
-      console.log(`Creating ${missingProducts.length} new inventory records...`);
-      const newRecords = missingProducts.map(p => ({
-        product: p._id,
-        stockLevel: p.stock || 0,
-        lowStockThreshold: 10
-      }));
-      
-      // Use insertMany and wait for it
-      await Inventory.insertMany(newRecords, { ordered: false }).catch(e => console.log('Bulk insert partial success/collision'));
+    for (const p of products) {
+      await Inventory.updateOne(
+        { product: p._id },
+        { $setOnInsert: { stockLevel: p.stock || 0, lowStockThreshold: 10 } },
+        { upsert: true }
+      );
     }
 
-    // Return the fresh inventory
     const inventory = await Inventory.find().populate('product').sort({ createdAt: -1 });
-    res.json(inventory);
+    const cleanInventory = inventory.filter(item => item.product !== null);
+    res.json(cleanInventory);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
