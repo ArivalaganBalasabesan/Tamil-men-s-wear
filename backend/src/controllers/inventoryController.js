@@ -5,23 +5,24 @@ exports.getInventory = async (req, res) => {
     const Product = require('../models/Product');
     const products = await Product.find();
     
-    // Force Sync
-    for (const p of products) {
-      await Inventory.findOneAndUpdate(
-        { product: p._id },
-        { 
-          $setOnInsert: { 
-            product: p._id, 
-            stockLevel: p.stock || 0, 
-            lowStockThreshold: 10 
-          } 
-        },
-        { upsert: true }
-      );
+    // 1. Try to get actual inventory records
+    let inventory = await Inventory.find().populate('product').sort({ createdAt: -1 });
+    inventory = inventory.filter(i => i.product);
+
+    // 2. FALLBACK: If inventory collection is empty but products exist, return products as virtual inventory
+    if (inventory.length === 0 && products.length > 0) {
+      console.log('Inventory empty, returning virtual inventory from products');
+      const virtualInventory = products.map(p => ({
+        _id: `v-${p._id}`,
+        product: p,
+        stockLevel: p.stock || 0,
+        lowStockThreshold: 10
+      }));
+      return res.json(virtualInventory);
     }
 
-    const inventory = await Inventory.find().populate('product').sort({ createdAt: -1 });
-    res.json(inventory.filter(i => i.product));
+    // 3. Normal return
+    res.json(inventory);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
