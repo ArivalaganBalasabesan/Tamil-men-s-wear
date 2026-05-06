@@ -5,23 +5,23 @@ exports.getInventory = async (req, res) => {
     const Product = require('../models/Product');
     const products = await Product.find();
     
-    // If collection was dropped, this will be []
-    const existingProductIds = await Inventory.find().distinct('product');
-    const existingProductIdsStr = existingProductIds.map(id => id.toString());
-    
-    const missingProducts = products.filter(p => !existingProductIdsStr.includes(p._id.toString()));
-
+    // Force Sync
     for (const p of products) {
-      await Inventory.updateOne(
+      await Inventory.findOneAndUpdate(
         { product: p._id },
-        { $setOnInsert: { stockLevel: p.stock || 0, lowStockThreshold: 10 } },
+        { 
+          $setOnInsert: { 
+            product: p._id, 
+            stockLevel: p.stock || 0, 
+            lowStockThreshold: 10 
+          } 
+        },
         { upsert: true }
       );
     }
 
     const inventory = await Inventory.find().populate('product').sort({ createdAt: -1 });
-    const cleanInventory = inventory.filter(item => item.product !== null);
-    res.json(cleanInventory);
+    res.json(inventory.filter(i => i.product));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
