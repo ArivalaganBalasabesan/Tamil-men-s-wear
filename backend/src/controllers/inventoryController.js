@@ -5,24 +5,33 @@ exports.getInventory = async (req, res) => {
     const Product = require('../models/Product');
     const products = await Product.find();
     
-    // 1. Try to get actual inventory records
-    let inventory = await Inventory.find().populate('product').sort({ createdAt: -1 });
-    inventory = inventory.filter(i => i.product);
-
-    // 2. FALLBACK: If inventory collection is empty but products exist, return products as virtual inventory
-    if (inventory.length === 0 && products.length > 0) {
-      console.log('Inventory empty, returning virtual inventory from products');
-      const virtualInventory = products.map(p => ({
-        _id: `v-${p._id}`,
-        product: p,
-        stockLevel: p.stock || 0,
-        lowStockThreshold: 10
-      }));
-      return res.json(virtualInventory);
+    // 1. CLEANUP: Remove any inventory record that points to a non-existent product
+    const allInv = await Inventory.find();
+    for (const inv of allInv) {
+      const exists = await Product.exists({ _id: inv.product });
+      if (!exists) {
+        await Inventory.deleteOne({ _id: inv._id });
+      }
     }
 
-    // 3. Normal return
-    res.json(inventory);
+    // 2. REBUILD: Ensure every single CURRENT product has a valid inventory record
+    for (const p of products) {
+      await Inventory.findOneAndUpdate(
+        { product: p._id },
+        { 
+          $setOnInsert: { 
+            product: p._id, 
+            stockLevel: p.stock || 0, 
+            lowStockThreshold: 10 
+          } 
+        },
+        { upsert: true }
+      );
+    }
+
+    // 3. RETURN: Only records with valid, populated products
+    const inventory = await Inventory.find().populate('product').sort({ createdAt: -1 });
+    res.json(inventory.filter(i => i.product));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
