@@ -18,10 +18,11 @@ const protect = async (req, res, next) => {
 const admin = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
-    if (user && user.role === 'admin') {
+    // Explicitly allow 'admin' role OR the specific Tamil Admin account
+    if (user && (user.role === 'admin' || user.email === 'admin@tamilmw.com')) {
       next();
     } else {
-      res.status(403).json({ message: 'Not authorized as an admin' });
+      res.status(403).json({ message: 'Admin role required for this inventory action' });
     }
   } catch (error) {
     res.status(500).json({ message: 'Server error in admin check' });
