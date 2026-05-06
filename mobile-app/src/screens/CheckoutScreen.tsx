@@ -9,6 +9,7 @@ import { Colors } from '../constants/Theme';
 
 export default function CheckoutScreen({ navigation }) {
   const { items, total } = useSelector(state => state.cart);
+  const { user } = useSelector(state => state.auth);
   const { isDark } = useSelector(state => state.theme);
   const theme = isDark ? Colors.dark : Colors.light;
   const dispatch = useDispatch();
@@ -18,11 +19,23 @@ export default function CheckoutScreen({ navigation }) {
   const [discount, setDiscount] = useState(0);
   const [promoLoading, setPromoLoading] = useState(false);
   const [shippingDetails, setShippingDetails] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
     address: ''
   });
+
+  // Re-sync if user changes
+  React.useEffect(() => {
+    if (user) {
+      setShippingDetails(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone
+      }));
+    }
+  }, [user]);
 
   const applyPromo = async () => {
     if (!promoCode) return;
