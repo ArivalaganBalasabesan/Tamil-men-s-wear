@@ -24,16 +24,13 @@ router.get('/stats', protect, adminAuth, async (req, res) => {
     const categorySales = {};
 
     orders.forEach(o => {
-      if (o.paymentStatus === 'Completed' || o.orderStatus !== 'Cancelled') {
-        totalRevenue += o.totalAmount;
+      const amount = Number(o.totalAmount) || 0;
+      if (o.orderStatus !== 'Cancelled') {
+        totalRevenue += amount;
         
         const date = new Date(o.createdAt);
         const month = date.toLocaleString('default', { month: 'short' });
-        monthlySales[month] = (monthlySales[month] || 0) + o.totalAmount;
-
-        o.products.forEach(item => {
-           // We can track top products here if we populate
-        });
+        monthlySales[month] = (monthlySales[month] || 0) + amount;
       }
     });
 
